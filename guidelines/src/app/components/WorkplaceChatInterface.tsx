@@ -522,7 +522,7 @@ export function WorkplaceChatInterface({
                   <AlertTriangle className="w-4 h-4" style={{ color: 'rgb(252,117,123)' }} />
                   <h4 className="text-sm font-semibold" style={{ color: 'rgb(252,117,123)' }}>风险判定</h4>
                 </div>
-                <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: 'rgb(45,45,45)'' }}>
+                <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: 'rgb(45,45,45)' }}>
                   {supervisorFeedback.risk_assessment || '暂无判定'}
                 </p>
               </div>
@@ -534,7 +534,7 @@ export function WorkplaceChatInterface({
                     <AlertTriangle className="w-4 h-4" style={{ color: 'rgb(249,127,95)' }} />
                     <h4 className="text-sm font-semibold" style={{ color: 'rgb(249,127,95)' }}>雷区定位</h4>
                   </div>
-                  <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: 'rgb(45,45,45)'' }}>
+                  <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: 'rgb(45,45,45)' }}>
                     {supervisorFeedback.risk_zone}
                   </p>
                 </div>
@@ -547,7 +547,7 @@ export function WorkplaceChatInterface({
                     <Shield className="w-4 h-4" style={{ color: 'rgb(60,155,201)' }} />
                     <h4 className="text-sm font-semibold" style={{ color: 'rgb(60,155,201)' }}>安全替换</h4>
                   </div>
-                  <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: 'rgb(45,45,45)'' }}>
+                  <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: 'rgb(45,45,45)' }}>
                     {supervisorFeedback.safe_alternative}
                   </p>
                 </div>
