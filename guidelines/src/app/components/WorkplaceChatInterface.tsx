@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
-import { ArrowLeft, Send, Sparkles, Lightbulb, TrendingUp, AlertTriangle, Shield, Loader2, BookOpen, User } from 'lucide-react';
+import { ArrowLeft, Send, Sparkles, Lightbulb, TrendingUp, AlertTriangle, Shield, Loader2, BookOpen, User, Activity } from 'lucide-react';
 import { Button } from '@/app/components/ui/button';
+import { EmotionMonitor } from '@/app/components/EmotionMonitor';
 import {
   SCENARIO_CARDS,
   PERSONA_CARDS,
@@ -54,22 +55,35 @@ export function WorkplaceChatInterface({
     scrollToBottom();
   }, [messages]);
 
-  // 生成结构化数据
-  const generateStructuredData = (): StructuredData => {
+  // 生成结构化数据 - 累积每轮对话的情绪数据
+  const generateStructuredData = (prevData: StructuredData): StructuredData => {
     const turnCount = Math.ceil(messages.length / 2);
+
+    // 情绪标签列表（用于随机生成）
+    const emotionLabels = ['平静', '困惑', '愤怒', '焦虑', '轻视', '满意', '失望', '期待', '紧张', '放松'];
+
+    // 生成新的情绪数据点
+    const newEmotionTimeline = [
+      ...(prevData.session_emotion_timeline || []),
+      { label: emotionLabels[Math.floor(Math.random() * emotionLabels.length)], turn: turnCount }
+    ];
+
+    // 生成新的压力数据点（0-1之间）
+    const newStressCurve = [
+      ...(prevData.stress_curve || []),
+      { turn: turnCount, value: Math.random() * 0.8 + 0.1 }
+    ];
+
+    // 生成新的情感强度数据点（-50到50之间）
+    const newEmotionCurve = [
+      ...(prevData.emotion_curve || []),
+      { turn: turnCount, value: Math.random() * 100 - 50 }
+    ];
+
     return {
-      session_emotion_timeline: [
-        { label: '平静', turn: 1 },
-        { label: '困惑', turn: Math.max(2, turnCount) }
-      ],
-      stress_curve: [
-        { turn: 1, value: 30 },
-        { turn: Math.max(2, turnCount), value: 50 + Math.random() * 30 }
-      ],
-      emotion_curve: [
-        { turn: 1, value: -5 },
-        { turn: Math.max(2, turnCount), value: -10 + Math.random() * 20 }
-      ]
+      session_emotion_timeline: newEmotionTimeline,
+      stress_curve: newStressCurve,
+      emotion_curve: newEmotionCurve
     };
   };
 
@@ -174,8 +188,8 @@ export function WorkplaceChatInterface({
 
       setMessages(prev => [...prev, assistantMessage]);
 
-      // 更新结构化数据
-      setStructuredData(generateStructuredData());
+      // 更新结构化数据（累积之前的情绪数据）
+      setStructuredData(prev => generateStructuredData(prev));
 
       // 调用督导API
       await fetchSupervisorFeedback(userReply);
@@ -332,7 +346,7 @@ export function WorkplaceChatInterface({
         </div>
 
         {/* 人设信息 */}
-        <div className="p-4">
+        <div className="p-4 border-b-2" style={{ borderColor: 'rgba(60,155,201,0.1)' }}>
           <div className="flex items-center gap-2 mb-3">
             <span className="text-xl">{persona.icon}</span>
             <h4 className="font-semibold text-sm text-[rgb(45,45,45)]">{persona.title}</h4>
@@ -343,6 +357,31 @@ export function WorkplaceChatInterface({
               <span className="text-xs font-semibold text-[rgb(45,45,45)]">带教老师人设</span>
             </div>
             <p className="text-xs leading-relaxed text-[rgb(45,45,45)]">{persona.characteristics}</p>
+          </div>
+        </div>
+
+        {/* 带教情绪检测 */}
+        <div className="p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <Activity className="w-4 h-4" style={{ color: THEME_COLORS.blue }} />
+            <h4 className="font-semibold text-sm text-[rgb(45,45,45)]">带教情绪检测</h4>
+          </div>
+          <div className="rounded-lg p-3 border" style={{ backgroundColor: 'rgb(254,254,250)', borderColor: 'rgba(60,155,201,0.2)' }}>
+            {structuredData.session_emotion_timeline &&
+             structuredData.stress_curve &&
+             structuredData.emotion_curve ? (
+              <EmotionMonitor
+                emotionTimeline={structuredData.session_emotion_timeline}
+                stressCurve={structuredData.stress_curve}
+                emotionCurve={structuredData.emotion_curve}
+              />
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-xs text-[rgb(122,122,122)]">
+                  开始对话后将显示带教老师的情绪变化
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>
