@@ -163,8 +163,12 @@ export function WorkplaceChatInterface({
     setIsLoading(true);
 
     try {
-      // 传递人设标题，API内部会映射到正确的格式
-      const response = await workplaceApiService.callNPC(messageContent, persona.title);
+      // 第一条消息时传递场景信息作为表单输入
+      const scenarioInfo = isFirstMessage
+        ? `场景：${scenario.title}\n背景：${scenario.background}\n具体事件：${scenario.event}`
+        : undefined;
+
+      const response = await workplaceApiService.callNPC(messageContent, persona.title, scenarioInfo);
 
       const assistantMessage: Message = {
         role: 'assistant',

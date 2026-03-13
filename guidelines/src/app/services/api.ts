@@ -130,7 +130,7 @@ export class WorkplaceApiService {
   }
 
   // 调用 NPC API（带教老师）
-  async callNPC(message: string, personaTitle: string): Promise<string> {
+  async callNPC(message: string, personaTitle: string, scenarioInfo?: string): Promise<string> {
     const config = getApiConfig().npc;
 
     // 使用精确的人设映射
@@ -141,8 +141,15 @@ export class WorkplaceApiService {
     }
 
     console.log('使用NPC人设:', personaTitle, '=>', npcPersona);
+    if (scenarioInfo) {
+      console.log('场景信息:', scenarioInfo.substring(0, 100));
+    }
 
-    const inputs = { npc_persona: npcPersona };
+    // 构建inputs - 包含人设和场景信息
+    const inputs: Record<string, any> = { npc_persona: npcPersona };
+    if (scenarioInfo) {
+      inputs.scenario = scenarioInfo;
+    }
 
     const response = await this.callDifyAPI(
       config.url,
@@ -188,9 +195,7 @@ ${persona}
 ${historyText || '（暂无对话记录）'}
 
 【结构化数据】
-${structuredDataText}
-
-请基于以上信息，为职场新人生成下一轮回复的提示建议。用简洁的语言给出1-2条具体的回复建议。`;
+${structuredDataText}`;
 
     console.log('调用Hint API');
 
