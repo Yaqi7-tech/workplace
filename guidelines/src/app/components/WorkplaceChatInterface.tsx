@@ -357,7 +357,7 @@ export function WorkplaceChatInterface({
                     </div>
                     <div className="p-4 rounded-lg" style={{ backgroundColor: 'rgb(254,225,153,0.3)' }}>
                       <h5 className="text-xs font-semibold mb-2" style={{ color: 'rgb(249,127,95)' }}>📋 具体事件</h5>
-                      <p className="text-sm" style={{ color: 'rgb(45,45,45)] }}>{scenario.event}</p>
+                      <p className="text-sm" style={{ color: 'rgb(45,45,45)' }}>{scenario.event}</p>
                     </div>
                     <div>
                       <h5 className="text-xs font-semibold text-[rgb(122,122,122)] mb-2">👤 带教老师：{persona.title}</h5>
