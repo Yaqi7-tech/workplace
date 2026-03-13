@@ -1,0 +1,4 @@
+/* Add Songti (SimSun) font for Chinese text */
+body {
+  font-family: "SimSun", "宋体", "STSong", "Songti SC", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
