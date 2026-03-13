@@ -163,12 +163,8 @@ export function WorkplaceChatInterface({
     setIsLoading(true);
 
     try {
-      // 第一条消息时传递场景信息作为表单输入
-      const scenarioInfo = isFirstMessage
-        ? `场景：${scenario.title}\n背景：${scenario.background}\n具体事件：${scenario.event}`
-        : undefined;
-
-      const response = await workplaceApiService.callNPC(messageContent, persona.title, scenarioInfo);
+      // 传递场景标题和人设标题给NPC API
+      const response = await workplaceApiService.callNPC(messageContent, persona.title, scenario.title);
 
       const assistantMessage: Message = {
         role: 'assistant',
