@@ -1,7 +1,13 @@
 import { useState } from 'react';
-import { ArrowLeft, Download, Share2, MessageSquare, Star, TrendingUp } from 'lucide-react';
+import { ArrowLeft, Download, MessageSquare, Star, TrendingUp } from 'lucide-react';
 import { Button } from '@/app/components/ui/button';
-import { SCENARIO_CARDS, PERSONA_CARDS, type ScenarioType, type PersonaType } from '@/app/config/workplaceScenarios';
+import {
+  SCENARIO_CARDS,
+  PERSONA_CARDS,
+  THEME_COLORS,
+  type ScenarioType,
+  type PersonaType
+} from '@/app/config/workplaceScenarios';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -42,10 +48,6 @@ export function WorkplaceReport({
     ? Math.round((metadata.finishedAt.getTime() - metadata.startedAt.getTime()) / 1000 / 60)
     : 0;
 
-  // 提取用户消息
-  const userMessages = messages.filter(m => m.role === 'user');
-  const assistantMessages = messages.filter(m => m.role === 'assistant');
-
   // 导出对话记录
   const handleExport = () => {
     const exportData = {
@@ -57,7 +59,7 @@ export function WorkplaceReport({
       messages: messages.map(m => ({
         role: m.role === 'user' ? '学员' : '带教老师',
         content: m.content,
-                        time: m.timestamp.toLocaleString('zh-CN')
+        time: m.timestamp.toLocaleString('zh-CN')
       })),
       selfRating: selectedRating,
       selfReflection: selfReflection
@@ -79,37 +81,38 @@ export function WorkplaceReport({
       return;
     }
     setHasSubmitted(true);
-    // 这里可以将评估数据保存到数据库
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
+    <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, rgb(254,254,250), rgb(254,253,249), rgb(254,254,250))' }}>
       {/* Header */}
-      <div className="bg-white border-b border-slate-200">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div className="bg-white border-b-2">
+        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between" style={{ borderColor: 'rgba(60,155,201,0.15)' }}>
           <Button
             variant="ghost"
             onClick={onBackToSelection}
-            className="hover:bg-slate-100"
+            className="hover:bg-[rgb(60,155,201,0.1)]"
           >
-            <ArrowLeft className="w-4 h-4 mr-2" />
+            <ArrowLeft className="w-4 h-4 mr-2" style={{ color: THEME_COLORS.blue }} />
             返回场景选择
           </Button>
-          <h2 className="text-lg font-semibold text-slate-900">
+          <h2 className="text-lg font-semibold text-[rgb(45,45,45)]">
             训练报告
           </h2>
           <div className="flex gap-2">
             <Button
               variant="outline"
               onClick={handleExport}
-              className="border-slate-200"
+              className="border-[rgb(60,155,201,0.3)] hover:bg-[rgb(60,155,201,0.1)]"
+              style={{ color: THEME_COLORS.blue }}
             >
               <Download className="w-4 h-4 mr-2" />
               导出记录
             </Button>
             <Button
               onClick={onRestart}
-              className="bg-blue-600 hover:bg-blue-700"
+              className="text-white hover:opacity-90"
+              style={{ backgroundColor: THEME_COLORS.blue }}
             >
               再次训练
             </Button>
@@ -122,40 +125,43 @@ export function WorkplaceReport({
           {/* 左侧：对话记录 */}
           <div className="lg:col-span-2 space-y-6">
             {/* 训练概览 */}
-            <div className="bg-white rounded-2xl border border-slate-200 p-6">
+            <div className="bg-white rounded-2xl border-2 p-6" style={{ borderColor: 'rgba(60,155,201,0.15)' }}>
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center text-2xl">
+                <div
+                  className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl"
+                  style={{ backgroundColor: scenario.color + '33' }}
+                >
                   {scenario.icon}
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-slate-900">{metadata.scenarioTitle}</h3>
-                  <p className="text-sm text-slate-500">与 {persona.icon} {metadata.personaTitle} 的对话</p>
+                  <h3 className="text-xl font-bold text-[rgb(45,45,45)]">{metadata.scenarioTitle}</h3>
+                  <p className="text-sm text-[rgb(122,122,122)]">与 {persona.icon} {metadata.personaTitle} 的对话</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-3 gap-4">
-                <div className="text-center p-4 bg-slate-50 rounded-xl">
-                  <MessageSquare className="w-5 h-5 text-slate-400 mx-auto mb-2" />
-                  <p className="text-2xl font-bold text-slate-900">{metadata.turnCount}</p>
-                  <p className="text-xs text-slate-500">对话轮次</p>
+                <div className="text-center p-4 rounded-xl" style={{ backgroundColor: 'rgb(254,254,250)' }}>
+                  <MessageSquare className="w-5 h-5 mx-auto mb-2" style={{ color: THEME_COLORS.cyan }} />
+                  <p className="text-2xl font-bold text-[rgb(45,45,45)]">{metadata.turnCount}</p>
+                  <p className="text-xs text-[rgb(122,122,122)]">对话轮次</p>
                 </div>
-                <div className="text-center p-4 bg-slate-50 rounded-xl">
-                  <TrendingUp className="w-5 h-5 text-slate-400 mx-auto mb-2" />
-                  <p className="text-2xl font-bold text-slate-900">{duration}</p>
-                  <p className="text-xs text-slate-500">训练时长(分钟)</p>
+                <div className="text-center p-4 rounded-xl" style={{ backgroundColor: 'rgb(254,254,250)' }}>
+                  <TrendingUp className="w-5 h-5 mx-auto mb-2" style={{ color: THEME_COLORS.cyan }} />
+                  <p className="text-2xl font-bold text-[rgb(45,45,45)]">{duration}</p>
+                  <p className="text-xs text-[rgb(122,122,122)]">训练时长(分钟)</p>
                 </div>
-                <div className="text-center p-4 bg-slate-50 rounded-xl">
-                  <Star className="w-5 h-5 text-slate-400 mx-auto mb-2" />
-                  <p className="text-2xl font-bold text-slate-900">{selectedRating || '-'}</p>
-                  <p className="text-xs text-slate-500">自我评分</p>
+                <div className="text-center p-4 rounded-xl" style={{ backgroundColor: 'rgb(254,254,250)' }}>
+                  <Star className="w-5 h-5 mx-auto mb-2" style={{ color: THEME_COLORS.orange }} />
+                  <p className="text-2xl font-bold text-[rgb(45,45,45)]">{selectedRating || '-'}</p>
+                  <p className="text-xs text-[rgb(122,122,122)]">自我评分</p>
                 </div>
               </div>
             </div>
 
             {/* 对话历史 */}
-            <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-              <div className="px-6 py-4 border-b border-slate-200 bg-slate-50">
-                <h3 className="font-semibold text-slate-900">对话记录</h3>
+            <div className="bg-white rounded-2xl border-2 overflow-hidden" style={{ borderColor: 'rgba(60,155,201,0.15)' }}>
+              <div className="px-6 py-4 border-b-2" style={{ backgroundColor: 'rgb(254,254,250)', borderColor: 'rgba(60,155,201,0.1)' }}>
+                <h3 className="font-semibold text-[rgb(45,45,45)]">对话记录</h3>
               </div>
               <div className="max-h-[600px] overflow-y-auto p-6 space-y-4">
                 {messages.map((message, index) => (
@@ -165,9 +171,11 @@ export function WorkplaceReport({
                   >
                     <div className={`max-w-lg rounded-2xl px-5 py-3 ${
                       message.role === 'user'
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-slate-100 text-slate-800'
-                    }`}>
+                        ? 'text-white'
+                        : 'text-[rgb(45,45,45)]'
+                    }`}
+                    style={message.role === 'user' ? { backgroundColor: THEME_COLORS.blue } : { backgroundColor: 'rgb(254,254,250)' }}
+                    >
                       <div className="flex items-center gap-2 mb-2">
                         <span className="text-xs font-medium opacity-70">
                           {message.role === 'user' ? '👤 你' : `${persona.icon} 带教老师`}
@@ -192,12 +200,12 @@ export function WorkplaceReport({
           {/* 右侧：自我评估 */}
           <div className="space-y-6">
             {/* 自我评分 */}
-            <div className="bg-white rounded-2xl border border-slate-200 p-6">
-              <h3 className="font-semibold text-slate-900 mb-4 flex items-center gap-2">
-                <Star className="w-5 h-5 text-amber-500" />
+            <div className="bg-white rounded-2xl border-2 p-6" style={{ borderColor: 'rgba(60,155,201,0.15)' }}>
+              <h3 className="font-semibold text-[rgb(45,45,45)] mb-4 flex items-center gap-2">
+                <Star className="w-5 h-5" style={{ color: THEME_COLORS.orange }} />
                 自我评分
               </h3>
-              <p className="text-sm text-slate-600 mb-4">
+              <p className="text-sm text-[rgb(122,122,122)] mb-4">
                 请为这次训练表现打分（1-10分）
               </p>
               <div className="flex flex-wrap gap-2 mb-4">
@@ -208,81 +216,87 @@ export function WorkplaceReport({
                     disabled={hasSubmitted}
                     className={`w-10 h-10 rounded-lg font-medium transition-all ${
                       selectedRating === score
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                        ? 'text-white'
+                        : 'hover:opacity-80'
                     } ${hasSubmitted ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
+                    style={{
+                      backgroundColor: selectedRating === score ? THEME_COLORS.blue : 'rgb(254,254,250)',
+                      color: selectedRating === score ? 'white' : 'rgb(45,45,45)'
+                    }}
                   >
                     {score}
                   </button>
                 ))}
               </div>
               {selectedRating > 0 && !hasSubmitted && (
-                <p className="text-sm text-blue-600">
+                <p className="text-sm" style={{ color: THEME_COLORS.blue }}>
                   你选择了 {selectedRating} 分
                 </p>
               )}
             </div>
 
             {/* 自我反思 */}
-            <div className="bg-white rounded-2xl border border-slate-200 p-6">
-              <h3 className="font-semibold text-slate-900 mb-4">自我反思</h3>
-              <p className="text-sm text-slate-600 mb-4">
+            <div className="bg-white rounded-2xl border-2 p-6" style={{ borderColor: 'rgba(60,155,201,0.15)' }}>
+              <h3 className="font-semibold text-[rgb(45,45,45)] mb-4">自我反思</h3>
+              <p className="text-sm text-[rgb(122,122,122)] mb-4">
                 回顾这次对话，你觉得哪些地方做得好？哪些地方可以改进？
               </p>
               <textarea
                 value={selfReflection}
                 onChange={(e) => setSelfReflection(e.target.value)}
                 placeholder="写下你的反思..."
-                className="w-full min-h-[150px] px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none resize-none text-sm"
+                className="w-full min-h-[150px] px-4 py-3 rounded-xl border-2 outline-none resize-none text-sm transition-colors"
+                style={{ borderColor: 'rgba(60,155,201,0.2)', backgroundColor: 'rgb(254,254,250)' }}
                 disabled={hasSubmitted}
               />
               {!hasSubmitted ? (
                 <Button
-                  className="w-full mt-4 bg-blue-600 hover:bg-blue-700"
+                  className="w-full mt-4 text-white hover:opacity-90"
+                  style={{ backgroundColor: THEME_COLORS.blue }}
                   onClick={handleSubmitReflection}
                 >
                   提交评估
                 </Button>
               ) : (
-                <div className="mt-4 p-4 bg-green-50 rounded-xl border border-green-100 text-center">
-                  <p className="text-sm text-green-700 font-medium">✓ 评估已提交</p>
+                <div className="mt-4 p-4 rounded-xl border-2 text-center" style={{ backgroundColor: 'rgb(176,214,169,0.3)', borderColor: 'rgb(176,214,169)' }}>
+                  <p className="text-sm font-medium" style={{ color: 'rgb(60,155,201)' }}>✓ 评估已提交</p>
                 </div>
               )}
             </div>
 
             {/* 人设回顾 */}
-            <div className="bg-white rounded-2xl border border-slate-200 p-6">
-              <h3 className="font-semibold text-slate-900 mb-4">人设回顾</h3>
+            <div className="bg-white rounded-2xl border-2 p-6" style={{ borderColor: 'rgba(60,155,201,0.15)' }}>
+              <h3 className="font-semibold text-[rgb(45,45,45)] mb-4">人设回顾</h3>
               <div className="space-y-3 text-sm">
                 <div>
-                  <p className="text-slate-500 mb-1">特征</p>
-                  <p className="text-slate-700">{persona.characteristics}</p>
+                  <p className="text-[rgb(122,122,122)] mb-1">特征</p>
+                  <p className="text-[rgb(45,45,45)]">{persona.characteristics}</p>
                 </div>
                 <div>
-                  <p className="text-slate-500 mb-1">口头禅</p>
-                  <p className="text-slate-700 italic">{persona.catchphrase}</p>
+                  <p className="text-[rgb(122,122,122)] mb-1">口头禅</p>
+                  <p className="text-[rgb(45,45,45)] italic">{persona.catchphrase}</p>
                 </div>
               </div>
             </div>
 
             {/* 改进建议 */}
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl border border-blue-100 p-6">
-              <h3 className="font-semibold text-blue-900 mb-3">💡 练习建议</h3>
-              <ul className="text-sm text-blue-800 space-y-2">
+            <div className="rounded-2xl border-2 p-6" style={{ background: 'linear-gradient(135deg, rgba(60,155,201,0.1), rgba(101,189,186,0.1))', borderColor: 'rgba(60,155,201,0.2)' }}>
+              <h3 className="font-semibold mb-3" style={{ color: THEME_COLORS.blue }}>💡 练习建议</h3>
+              <ul className="text-sm space-y-2" style={{ color: THEME_COLORS.blue }}>
                 <li className="flex items-start gap-2">
-                  <span className="text-blue-500 mt-0.5">•</span>
+                  <span className="mt-0.5">•</span>
                   <span>尝试不同的人设组合，体验多样的职场沟通风格</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-blue-500 mt-0.5">•</span>
+                  <span className="mt-0.5">•</span>
                   <span>在反思中记录关键的学习点</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-blue-500 mt-0.5">•</span>
+                  <span className="mt-0.5">•</span>
                   <span>多次练习同一场景，观察自己的进步</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-blue-500 mt-0.5">•</span>
+                  <span className="mt-0.5">•</span>
                   <span>将训练中学到的技巧应用到实际工作中</span>
                 </li>
               </ul>

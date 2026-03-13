@@ -3,7 +3,7 @@ import { Button } from '@/app/components/ui/button';
 import { Input } from '@/app/components/ui/input';
 import { Label } from '@/app/components/ui/label';
 import { supabase } from '@/lib/supabase';
-import { Loader2, AlertCircle } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 interface LoginPageProps {
   onLogin: (userId?: string) => void;
@@ -11,7 +11,7 @@ interface LoginPageProps {
   subtitle?: string;
 }
 
-export function LoginPage({ onLogin, title = '心理咨询师培训系统', subtitle }: LoginPageProps) {
+export function LoginPage({ onLogin, title = '职场培训系统', subtitle }: LoginPageProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -75,15 +75,15 @@ export function LoginPage({ onLogin, title = '心理咨询师培训系统', subt
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
+    <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgb(254,254,250), rgb(254,253,249))' }}>
       <div className="w-full max-w-md">
-        <div className="bg-white rounded-2xl shadow-lg p-8">
+        <div className="bg-white rounded-2xl shadow-lg p-8 border-2" style={{ borderColor: 'rgba(60,155,201,0.15)' }}>
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-semibold text-slate-900 mb-2">
+            <h1 className="text-3xl font-semibold text-[rgb(45,45,45)] mb-2">
               {title}
             </h1>
-            <p className="text-slate-500">
-              {isRegisterMode ? '注册账号' : (subtitle || '登录以开始您的培训评测')}
+            <p className="text-[rgb(122,122,122)]">
+              {isRegisterMode ? '注册账号' : (subtitle || '登录以开始您的培训')}
             </p>
           </div>
 
@@ -118,21 +118,21 @@ export function LoginPage({ onLogin, title = '心理咨询师培训系统', subt
             </div>
 
             {successMessage && (
-              <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                <p className="text-sm text-green-600">{successMessage}</p>
+              <div className="p-3 rounded-lg border-2" style={{ backgroundColor: 'rgb(176,214,169,0.3)', borderColor: 'rgb(176,214,169)' }}>
+                <p className="text-sm" style={{ color: 'rgb(60,155,201)' }}>{successMessage}</p>
               </div>
             )}
 
             {error && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                <p className="text-sm text-red-600">{error}</p>
+              <div className="p-3 rounded-lg border-2" style={{ backgroundColor: 'rgb(252,117,123,0.2)', borderColor: 'rgb(252,117,123)' }}>
+                <p className="text-sm" style={{ color: 'rgb(249,127,95)' }}>{error}</p>
               </div>
             )}
 
             <Button
               type="submit"
               className="w-full h-11 text-white hover:opacity-90"
-              style={{ backgroundColor: '#7BC0CD' }}
+              style={{ backgroundColor: 'rgb(60,155,201)' }}
               disabled={isLoading}
             >
               {isLoading ? (
@@ -154,15 +154,16 @@ export function LoginPage({ onLogin, title = '心理咨询师培训系统', subt
                 setError('');
                 setSuccessMessage('');
               }}
-              className="text-sm text-slate-500 hover:text-slate-700"
+              className="text-sm hover:opacity-70"
+              style={{ color: 'rgb(122,122,122)' }}
             >
               {isRegisterMode ? '已有账号？去登录' : '没有账号？去注册'}
             </button>
           </div>
         </div>
 
-        <p className="text-center text-sm text-slate-400 mt-8">
-          © 2026 心理咨询师培训评测系统
+        <p className="text-center text-sm mt-8" style={{ color: 'rgb(200,200,200)' }}>
+          © 2026 职场培训系统
         </p>
       </div>
     </div>

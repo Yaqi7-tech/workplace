@@ -6,6 +6,7 @@ import {
   SCENARIO_CARDS,
   getCombinedPrompt,
   DIFFICULTY_LABELS,
+  THEME_COLORS,
   type PersonaType,
   type ScenarioType
 } from '@/app/config/workplaceScenarios';
@@ -69,7 +70,7 @@ export function WorkplaceScenarioSelection({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
+    <div className="min-h-screen bg-gradient-to-br from-[rgb(254,254,250)] via-[rgb(254,253,249)] to-[rgb(254,254,250)]">
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
@@ -79,18 +80,18 @@ export function WorkplaceScenarioSelection({
                 variant="ghost"
                 size="icon"
                 onClick={currentStep === 'confirm' ? handleBackToPersonas : handleBackToScenarios}
-                className="hover:bg-slate-100"
+                className="hover:bg-[rgb(60,155,201,0.1)]"
               >
-                <ArrowLeft className="w-5 h-5" />
+                <ArrowLeft className="w-5 h-5" style={{ color: THEME_COLORS.blue }} />
               </Button>
             )}
             <div>
-              <h1 className="text-2xl font-semibold text-slate-900">
+              <h1 className="text-2xl font-semibold text-[rgb(45,45,45)]">
                 {currentStep === 'scenario' && '选择职场场景'}
                 {currentStep === 'persona' && '选择带教老师人设'}
                 {currentStep === 'confirm' && '确认训练配置'}
               </h1>
-              <p className="text-slate-500 text-sm mt-1">
+              <p className="text-[rgb(122,122,122)] text-sm mt-1">
                 {currentStep === 'scenario' && '请选择一个真实的职场沟通场景'}
                 {currentStep === 'persona' && '不同人设会带来完全不同的沟通挑战'}
                 {currentStep === 'confirm' && '检查配置后开始模拟训练'}
@@ -102,7 +103,8 @@ export function WorkplaceScenarioSelection({
               <Button
                 variant="outline"
                 onClick={onViewProgress}
-                className="border-slate-200 hover:bg-slate-50"
+                className="border-[rgb(60,155,201,0.3)] hover:bg-[rgb(60,155,201,0.1)]"
+                style={{ color: THEME_COLORS.blue }}
               >
                 <BarChart3 className="w-4 h-4 mr-2" />
                 查看进步分析
@@ -111,7 +113,8 @@ export function WorkplaceScenarioSelection({
             <Button
               variant="outline"
               onClick={onLogout}
-              className="border-slate-200 hover:bg-slate-50"
+              className="border-[rgb(60,155,201,0.3)] hover:bg-[rgb(60,155,201,0.1)]"
+              style={{ color: THEME_COLORS.blue }}
             >
               退出登录
             </Button>
@@ -121,21 +124,21 @@ export function WorkplaceScenarioSelection({
         {/* Progress Steps */}
         <div className="flex items-center justify-center gap-2 mb-8">
           <div className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all ${
-            currentStep === 'scenario' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-500'
+            currentStep === 'scenario' ? 'bg-[rgb(101,189,186,0.2)] text-[rgb(60,155,201)]' : 'bg-[rgb(245,245,240)] text-[rgb(122,122,122)]'
           }`}>
             <span className="w-6 h-6 rounded-full bg-white flex items-center justify-center text-sm font-medium">1</span>
             <span className="text-sm font-medium">选择场景</span>
           </div>
-          <div className="w-12 h-0.5 bg-slate-200" />
+          <div className="w-12 h-0.5 bg-[rgb(60,155,201,0.2)]" />
           <div className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all ${
-            currentStep === 'persona' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-500'
+            currentStep === 'persona' ? 'bg-[rgb(101,189,186,0.2)] text-[rgb(60,155,201)]' : 'bg-[rgb(245,245,240)] text-[rgb(122,122,122)]'
           }`}>
             <span className="w-6 h-6 rounded-full bg-white flex items-center justify-center text-sm font-medium">2</span>
             <span className="text-sm font-medium">选择人设</span>
           </div>
-          <div className="w-12 h-0.5 bg-slate-200" />
+          <div className="w-12 h-0.5 bg-[rgb(60,155,201,0.2)]" />
           <div className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all ${
-            currentStep === 'confirm' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-500'
+            currentStep === 'confirm' ? 'bg-[rgb(101,189,186,0.2)] text-[rgb(60,155,201)]' : 'bg-[rgb(245,245,240)] text-[rgb(122,122,122)]'
           }`}>
             <span className="w-6 h-6 rounded-full bg-white flex items-center justify-center text-sm font-medium">3</span>
             <span className="text-sm font-medium">确认开始</span>
@@ -152,7 +155,8 @@ export function WorkplaceScenarioSelection({
                 <div
                   key={type}
                   onClick={() => handleScenarioSelect(type)}
-                  className="group relative overflow-hidden rounded-2xl bg-white border border-slate-200 hover:border-slate-300 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 cursor-pointer"
+                  className="group relative overflow-hidden rounded-2xl bg-white border-2 hover:border-[rgb(60,155,201)] transition-all duration-300 hover:shadow-xl hover:-translate-y-1 cursor-pointer"
+                  style={{ borderColor: 'rgba(60,155,201,0.15)' }}
                 >
                   {/* Header */}
                   <div className="pt-6 px-6">
@@ -173,14 +177,14 @@ export function WorkplaceScenarioSelection({
                   {/* Content */}
                   <div className="p-6 text-left">
                     <div className="mb-4">
-                      <p className="text-xs text-slate-500 font-medium mb-2">背景情境</p>
-                      <p className="text-sm text-slate-600 leading-relaxed">
+                      <p className="text-xs text-[rgb(122,122,122)] font-medium mb-2">背景情境</p>
+                      <p className="text-sm text-[rgb(80,80,80)] leading-relaxed">
                         {scenario.background}
                       </p>
                     </div>
-                    <div className="pt-4 border-t border-slate-100">
-                      <p className="text-xs text-slate-500 font-medium mb-2">具体事件</p>
-                      <p className="text-sm text-slate-600 leading-relaxed line-clamp-3">
+                    <div className="pt-4 border-t" style={{ borderColor: 'rgba(60,155,201,0.1)' }}>
+                      <p className="text-xs text-[rgb(122,122,122)] font-medium mb-2">具体事件</p>
+                      <p className="text-sm text-[rgb(80,80,80)] leading-relaxed line-clamp-3">
                         {scenario.event}
                       </p>
                     </div>
@@ -188,7 +192,7 @@ export function WorkplaceScenarioSelection({
 
                   {/* Arrow indicator */}
                   <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <ArrowRight className="w-5 h-5 text-slate-400" />
+                    <ArrowRight className="w-5 h-5" style={{ color: THEME_COLORS.blue }} />
                   </div>
                 </div>
               );
@@ -198,8 +202,8 @@ export function WorkplaceScenarioSelection({
 
         {currentStep === 'persona' && selectedScenario && (
           <div>
-            <div className="mb-6 p-4 bg-blue-50 rounded-xl border border-blue-100">
-              <p className="text-sm text-blue-800">
+            <div className="mb-6 p-4 rounded-xl border-2" style={{ backgroundColor: 'rgba(60,155,201,0.1)', borderColor: 'rgba(60,155,201,0.2)' }}>
+              <p className="text-sm" style={{ color: THEME_COLORS.blue }}>
                 <span className="font-medium">已选场景：</span>
                 {SCENARIO_CARDS[selectedScenario].title}
               </p>
@@ -211,7 +215,8 @@ export function WorkplaceScenarioSelection({
                   <div
                     key={type}
                     onClick={() => handlePersonaSelect(type)}
-                    className="group relative overflow-hidden rounded-2xl bg-white border border-slate-200 hover:border-slate-300 transition-all duration-300 hover:shadow-xl cursor-pointer"
+                    className="group relative overflow-hidden rounded-2xl bg-white border-2 hover:border-[rgb(60,155,201)] transition-all duration-300 hover:shadow-xl cursor-pointer"
+                    style={{ borderColor: 'rgba(60,155,201,0.15)' }}
                   >
                     {/* Header */}
                     <div className="pt-6 px-6">
@@ -227,21 +232,21 @@ export function WorkplaceScenarioSelection({
                     {/* Content */}
                     <div className="p-6 text-left space-y-4">
                       <div>
-                        <p className="text-xs text-slate-500 font-medium mb-1">特征</p>
-                        <p className="text-sm text-slate-600">{persona.characteristics}</p>
+                        <p className="text-xs text-[rgb(122,122,122)] font-medium mb-1">特征</p>
+                        <p className="text-sm text-[rgb(80,80,80)]">{persona.characteristics}</p>
                       </div>
                       <div>
-                        <p className="text-xs text-slate-500 font-medium mb-1">{persona.catchphrase.split('：')[0]}</p>
-                        <p className="text-sm text-slate-600 italic">{persona.catchphrase.split('：')[1]}</p>
+                        <p className="text-xs text-[rgb(122,122,122)] font-medium mb-1">{persona.catchphrase.split('：')[0]}</p>
+                        <p className="text-sm text-[rgb(80,80,80)] italic">{persona.catchphrase.split('：')[1]}</p>
                       </div>
-                      <div className="pt-3 border-t border-slate-100">
-                        <p className="text-xs text-slate-500 leading-relaxed">{persona.behaviorRule}</p>
+                      <div className="pt-3 border-t" style={{ borderColor: 'rgba(60,155,201,0.1)' }}>
+                        <p className="text-xs text-[rgb(122,122,122)] leading-relaxed">{persona.behaviorRule}</p>
                       </div>
                     </div>
 
                     {/* Arrow indicator */}
                     <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <ArrowRight className="w-5 h-5 text-slate-400" />
+                      <ArrowRight className="w-5 h-5" style={{ color: THEME_COLORS.blue }} />
                     </div>
                   </div>
                 );
@@ -252,18 +257,18 @@ export function WorkplaceScenarioSelection({
 
         {currentStep === 'confirm' && selectedScenario && selectedPersona && (
           <div className="max-w-3xl mx-auto">
-            <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+            <div className="bg-white rounded-2xl border-2 overflow-hidden" style={{ borderColor: 'rgba(60,155,201,0.15)' }}>
               {/* Scenario */}
-              <div className="p-6 border-b border-slate-100">
+              <div className="p-6 border-b" style={{ borderColor: 'rgba(60,155,201,0.1)' }}>
                 <div className="flex items-center gap-3 mb-4">
                   <div
                     className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl"
-                    style={{ backgroundColor: SCENARIO_CARDS[selectedScenario].color + '20' }}
+                    style={{ backgroundColor: SCENARIO_CARDS[selectedScenario].color + '33' }}
                   >
                     {SCENARIO_CARDS[selectedScenario].icon}
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-slate-900">
+                    <h3 className="text-lg font-semibold text-[rgb(45,45,45)]">
                       {SCENARIO_CARDS[selectedScenario].title}
                     </h3>
                     <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${
@@ -275,33 +280,33 @@ export function WorkplaceScenarioSelection({
                 </div>
                 <div className="space-y-3">
                   <div>
-                    <p className="text-xs text-slate-500 font-medium mb-1">背景情境</p>
-                    <p className="text-sm text-slate-700">{SCENARIO_CARDS[selectedScenario].background}</p>
+                    <p className="text-xs text-[rgb(122,122,122)] font-medium mb-1">背景情境</p>
+                    <p className="text-sm text-[rgb(45,45,45)]">{SCENARIO_CARDS[selectedScenario].background}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-slate-500 font-medium mb-1">具体事件</p>
-                    <p className="text-sm text-slate-700">{SCENARIO_CARDS[selectedScenario].event}</p>
+                    <p className="text-xs text-[rgb(122,122,122)] font-medium mb-1">具体事件</p>
+                    <p className="text-sm text-[rgb(45,45,45)]">{SCENARIO_CARDS[selectedScenario].event}</p>
                   </div>
                 </div>
               </div>
 
               {/* Persona */}
-              <div className="p-6 bg-slate-50">
+              <div className="p-6" style={{ backgroundColor: 'rgb(254,254,250)' }}>
                 <div className="flex items-center gap-3 mb-4">
                   <div
                     className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl"
-                    style={{ backgroundColor: PERSONA_CARDS[selectedPersona].color + '20' }}
+                    style={{ backgroundColor: PERSONA_CARDS[selectedPersona].color + '33' }}
                   >
                     {PERSONA_CARDS[selectedPersona].icon}
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-slate-900">
+                    <h3 className="text-lg font-semibold text-[rgb(45,45,45)]">
                       {PERSONA_CARDS[selectedPersona].title}
                     </h3>
-                    <p className="text-xs text-slate-500">带教老师人设</p>
+                    <p className="text-xs text-[rgb(122,122,122)]">带教老师人设</p>
                   </div>
                 </div>
-                <div className="space-y-2 text-sm text-slate-700">
+                <div className="space-y-2 text-sm text-[rgb(45,45,45)]">
                   <p><span className="font-medium">特征：</span>{PERSONA_CARDS[selectedPersona].characteristics}</p>
                   <p className="italic">{PERSONA_CARDS[selectedPersona].catchphrase}</p>
                 </div>
@@ -312,7 +317,8 @@ export function WorkplaceScenarioSelection({
             <div className="mt-8 flex justify-center">
               <Button
                 size="lg"
-                className="px-12 py-6 text-lg bg-blue-600 hover:bg-blue-700"
+                className="px-12 py-6 text-lg text-white hover:opacity-90"
+                style={{ backgroundColor: THEME_COLORS.blue }}
                 onClick={handleStartPractice}
               >
                 <CheckCircle2 className="w-5 h-5 mr-2" />
@@ -321,8 +327,8 @@ export function WorkplaceScenarioSelection({
             </div>
 
             {/* Tips */}
-            <div className="mt-6 p-4 bg-amber-50 rounded-xl border border-amber-100">
-              <p className="text-sm text-amber-800">
+            <div className="mt-6 p-4 rounded-xl border-2" style={{ backgroundColor: 'rgb(254,225,153,0.4)', borderColor: 'rgb(254,225,153)' }}>
+              <p className="text-sm" style={{ color: 'rgb(249,127,95)' }}>
                 <span className="font-medium">💡 提示：</span>
                 训练开始后，你需要根据场景给出的具体事件，发送你的开场白来开始对话。请尽量真实地模拟职场沟通场景。
               </p>
