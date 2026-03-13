@@ -39,7 +39,7 @@ export function WorkplaceChatInterface({
   const [isLoadingHint, setIsLoadingHint] = useState(false);
   const [supervisorFeedback, setSupervisorFeedback] = useState<SupervisorFeedback | null>(null);
   const [structuredData, setStructuredData] = useState<StructuredData>({});
-  const [showBackgroundInfo, setShowBackgroundInfo] = useState(false);
+  const [showBackgroundInfo, setShowBackgroundInfo] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
