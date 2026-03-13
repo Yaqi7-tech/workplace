@@ -9,6 +9,16 @@ interface ChatMessage {
 interface DifyResponse {
   answer: string;
   conversation_id: string;
+  // NPC API 可能返回的情绪数据
+  session_emotion_timeline?: Array<{ label: string; turn: number }>;
+  stress_curve?: Array<{ turn: number; value: number }>;
+  emotion_curve?: Array<{ label: string; turn: number } | { turn: number; value: number }>;
+}
+
+// NPC API 返回类型（包含消息和情绪数据）
+export interface NPCResponse {
+  message: string;
+  emotionData?: StructuredData;
 }
 
 // 对话消息类型
@@ -28,7 +38,16 @@ export interface StructuredData {
 // Hint API 响应类型
 export interface HintResponse {
   hint: string;
+  hintData?: HintData;
   suggestions?: string[];
+}
+
+// 结构化 Hint 数据类型
+export interface HintData {
+  diagnosis: string;
+  theory_base: string;
+  guidance: string;
+  example_reply: string;
 }
 
 // 督导反馈结构化类型
@@ -122,7 +141,7 @@ export class WorkplaceApiService {
   }
 
   // 调用 NPC API（带教老师）
-  async callNPC(message: string, personaTitle: string, scenarioTitle?: string): Promise<string> {
+  async callNPC(message: string, personaTitle: string, scenarioTitle?: string): Promise<NPCResponse> {
     const config = getApiConfig().npc;
 
     console.log('使用NPC人设:', personaTitle);
@@ -151,7 +170,49 @@ export class WorkplaceApiService {
       this.conversationId = response.conversation_id;
     }
 
-    return response.answer;
+    // 提取情绪数据（如果存在）
+    const emotionData: StructuredData = {};
+
+    if (response.session_emotion_timeline) {
+      emotionData.session_emotion_timeline = response.session_emotion_timeline;
+    }
+    if (response.stress_curve) {
+      emotionData.stress_curve = response.stress_curve;
+    }
+    if (response.emotion_curve) {
+      // 处理 emotion_curve - 可能包含 label 或 value
+      emotionData.emotion_curve = response.emotion_curve.map(item => {
+        if ('label' in item) {
+          // 如果有 label 字段，将其转换为 value
+          // 这里需要根据实际的情绪标签来映射数值
+          const emotionValueMap: Record<string, number> = {
+            '愤怒': 80,
+            '焦虑': 70,
+            '紧张': 60,
+            '轻视': 30,
+            '困惑': 20,
+            '失望': 10,
+            '平静': 0,
+            '放松': -20,
+            '满意': -30,
+            '期待': -40
+          };
+          return {
+            turn: item.turn,
+            value: emotionValueMap[item.label] || 0
+          };
+        } else {
+          // 已经有 value 字段，直接返回
+          return item as { turn: number; value: number };
+        }
+      });
+    }
+
+    return {
+      message: response.answer,
+      emotionData: Object.keys(emotionData).length > 0 ? emotionData : undefined
+    };
+  }
   }
 
   // 调用 Hint API（生成提示）

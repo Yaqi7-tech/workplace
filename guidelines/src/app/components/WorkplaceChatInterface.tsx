@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { ArrowLeft, Send, Sparkles, Lightbulb, TrendingUp, AlertTriangle, Shield, Loader2, BookOpen, User, Activity } from 'lucide-react';
 import { Button } from '@/app/components/ui/button';
 import { EmotionMonitor } from '@/app/components/EmotionMonitor';
+import { HintPanel } from '@/app/components/HintPanel';
 import {
   SCENARIO_CARDS,
   PERSONA_CARDS,
@@ -9,7 +10,7 @@ import {
   type ScenarioType,
   type PersonaType
 } from '@/app/config/workplaceScenarios';
-import { workplaceApiService, ChatMessageItem, StructuredData, SupervisorFeedback } from '@/app/services/api';
+import { workplaceApiService, ChatMessageItem, StructuredData, SupervisorFeedback, NPCResponse, HintData } from '@/app/services/api';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -36,7 +37,7 @@ export function WorkplaceChatInterface({
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isStarted, setIsStarted] = useState(false);
-  const [hint, setHint] = useState<string>('');
+  const [hintData, setHintData] = useState<HintData | null>(null);
   const [isLoadingHint, setIsLoadingHint] = useState(false);
   const [supervisorFeedback, setSupervisorFeedback] = useState<SupervisorFeedback | null>(null);
   const [structuredData, setStructuredData] = useState<StructuredData>({});
@@ -90,8 +91,8 @@ export function WorkplaceChatInterface({
   // 自动获取提示 - NPC回复后自动调用
   useEffect(() => {
     const lastMessage = messages[messages.length - 1];
-    // 只在最后一条是NPC回复且之前没有获取过hint时调用
-    if (lastMessage && lastMessage.role === 'assistant' && !isLoading && !hint) {
+    // 只在最后一条是NPC回复且之前没有获取过hintData时调用
+    if (lastMessage && lastMessage.role === 'assistant' && !isLoading && !hintData) {
       fetchHint();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -120,10 +121,27 @@ export function WorkplaceChatInterface({
       );
 
       console.log('Hint API响应:', response);
-      setHint(response.hint);
+
+      // 检查是否返回了结构化数据
+      if (response.hintData) {
+        setHintData(response.hintData);
+      } else {
+        // 向后兼容：如果是纯文本 hint，尝试解析 JSON
+        try {
+          const parsed = JSON.parse(response.hint);
+          if (parsed.diagnosis && parsed.theory_base && parsed.guidance && parsed.example_reply) {
+            setHintData(parsed);
+          } else {
+            // 不是有效的结构化数据，作为普通文本处理
+            console.warn('Hint 返回的不是有效的结构化数据，使用默认提示');
+          }
+        } catch {
+          // 不是 JSON 格式，作为普通文本处理
+          console.warn('Hint 返回的不是 JSON 格式');
+        }
+      }
     } catch (error) {
       console.error('获取提示失败:', error);
-      setHint('请根据当前情境，思考如何回应带教老师。');
     } finally {
       setIsLoadingHint(false);
     }
@@ -168,8 +186,8 @@ export function WorkplaceChatInterface({
       timestamp: new Date()
     };
 
-    // 清空hint和督导反馈，准备新的一轮
-    setHint('');
+    // 清空hintData和督导反馈，准备新的一轮
+    setHintData(null);
     setSupervisorFeedback(null);
 
     setMessages(prev => [...prev, userMessage]);
@@ -177,19 +195,48 @@ export function WorkplaceChatInterface({
     setIsLoading(true);
 
     try {
-      // Dify现在通过表单字段接收场景和人设，query只需要用户的实际消息
-      const response = await workplaceApiService.callNPC(userReply, persona.title, scenario.title);
+      // 调用 NPC API，获取消息和情绪数据
+      const npcResponse = await workplaceApiService.callNPC(userReply, persona.title, scenario.title);
 
       const assistantMessage: Message = {
         role: 'assistant',
-        content: response,
+        content: npcResponse.message,
         timestamp: new Date()
       };
 
       setMessages(prev => [...prev, assistantMessage]);
 
-      // 更新结构化数据（累积之前的情绪数据）
-      setStructuredData(prev => generateStructuredData(prev));
+      // 更新结构化数据 - 使用 NPC 返回的情绪数据，如果没有则生成模拟数据
+      if (npcResponse.emotionData) {
+        setStructuredData(prev => {
+          // 合并之前的情绪数据和新返回的数据
+          const mergedData: StructuredData = {};
+
+          if (npcResponse.emotionData.session_emotion_timeline) {
+            mergedData.session_emotion_timeline = [
+              ...(prev.session_emotion_timeline || []),
+              ...npcResponse.emotionData.session_emotion_timeline
+            ];
+          }
+          if (npcResponse.emotionData.stress_curve) {
+            mergedData.stress_curve = [
+              ...(prev.stress_curve || []),
+              ...npcResponse.emotionData.stress_curve
+            ];
+          }
+          if (npcResponse.emotionData.emotion_curve) {
+            mergedData.emotion_curve = [
+              ...(prev.emotion_curve || []),
+              ...npcResponse.emotionData.emotion_curve
+            ];
+          }
+
+          return mergedData;
+        });
+      } else {
+        // 如果 NPC 没有返回情绪数据，使用模拟数据
+        setStructuredData(prev => generateStructuredData(prev));
+      }
 
       // 调用督导API
       await fetchSupervisorFeedback(userReply);
@@ -208,10 +255,11 @@ export function WorkplaceChatInterface({
     }
   };
 
-  // 使用提示
-  const useHint = () => {
-    if (hint) {
-      setInputValue(hint);
+  // 使用提示（使用示例回复）
+  const useHint = (exampleText?: string) => {
+    const textToUse = exampleText || hintData?.example_reply || '';
+    if (textToUse) {
+      setInputValue(textToUse);
       inputRef.current?.focus();
     }
   };
@@ -472,24 +520,8 @@ export function WorkplaceChatInterface({
                     <span className="text-sm" style={{ color: 'rgb(249,127,95)' }}>正在生成回复建议...</span>
                   </div>
                 </div>
-              ) : hint ? (
-                <div className="rounded-xl p-3" style={{ backgroundColor: 'rgb(254,225,153,0.3)', border: '1px solid rgb(254,225,153)' }}>
-                  <div className="flex items-start gap-2">
-                    <Lightbulb className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: 'rgb(249,127,95)' }} />
-                    <div className="flex-1">
-                      <p className="text-sm leading-relaxed mr-3" style={{ color: 'rgb(45,45,45)' }}>{hint}</p>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={useHint}
-                        className="text-xs px-2 py-1 h-auto hover:bg-[rgb(60,155,201,0.1)]"
-                        style={{ color: THEME_COLORS.blue }}
-                      >
-                        使用
-                      </Button>
-                    </div>
-                  </div>
-                </div>
+              ) : hintData ? (
+                <HintPanel hintData={hintData} onUseExample={useHint} />
               ) : null}
             </div>
           </div>
