@@ -369,17 +369,9 @@ export function WorkplaceChatInterface({
                     <User className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: THEME_COLORS.blue }} />
                     <h4 className="text-sm font-semibold text-[rgb(45,45,45)]">带教老师人设</h4>
                   </div>
-                  <div className="space-y-2 text-sm">
-                    <p className="text-[rgb(45,45,45)] leading-relaxed">
-                      <span className="font-semibold">特征：</span>{persona.characteristics}
-                    </p>
-                    <p className="text-[rgb(122,122,122)] italic text-xs leading-relaxed">
-                      {persona.catchphrase}
-                    </p>
-                    <p className="text-[rgb(249,127,95)] text-xs leading-relaxed border-l-2 pl-2" style={{ borderColor: 'rgb(249,127,95)' }}>
-                      <span className="font-semibold">行为红线：</span>{persona.behaviorRule}
-                    </p>
-                  </div>
+                  <p className="text-sm text-[rgb(45,45,45)] leading-relaxed">
+                    {persona.characteristics}
+                  </p>
                 </div>
               </div>
             )}
