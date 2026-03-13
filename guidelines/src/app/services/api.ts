@@ -50,7 +50,7 @@ const getApiConfig = () => {
   const npcUrl = import.meta.env.VITE_NPC_API_URL || 'https://api.dify.ai/v1';
   const npcKey = import.meta.env.VITE_NPC_API_KEY || 'app-R4FHtuNaBdtN9LzCgECSMUqS';
   const hintUrl = import.meta.env.VITE_HINT_API_URL || 'https://api.dify.ai/v1';
-  const hintKey = import.meta.env.VITE_HINT_API_KEY || 'app-yQp1aS5YSKGlUEmlMpqY7rwG';
+  const hintKey = import.meta.env.VITE_HINT_API_KEY || 'app-8XBYq3cFNVIHX4HqJNXqp28A';
   const supervisorUrl = import.meta.env.VITE_SUPERVISOR_API_URL || 'https://api.dify.ai/v1';
   const supervisorKey = import.meta.env.VITE_SUPERVISOR_API_KEY || 'app-yQp1aS5YSKGlUEmlMpqY7rwG';
 
