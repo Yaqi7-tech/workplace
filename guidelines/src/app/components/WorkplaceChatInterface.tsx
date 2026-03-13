@@ -69,8 +69,8 @@ export function WorkplaceChatInterface({
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          apiUrl: import.meta.env.VITE_SOCIAL_DIFY_PARTNER_API_URL || 'https://api.dify.ai/v1',
-          apiKey: import.meta.env.VITE_SOCIAL_DIFY_PARTNER_API_KEY || '',
+          apiUrl: import.meta.env.VITE_NPC_API_URL || 'https://api.dify.ai/v1',
+          apiKey: import.meta.env.VITE_NPC_API_KEY || 'app-R4FHtuNaBdtN9LzCgECSMUqS',
           payload: {
             query: userMessage.content,
             response_mode: 'blocking',

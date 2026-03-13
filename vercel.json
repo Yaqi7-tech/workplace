@@ -14,5 +14,9 @@
       "source": "/api/:path*",
       "destination": "/api/:path*"
     }
-  ]
+  ],
+  "env": {
+    "VITE_NPC_API_URL": "https://api.dify.ai/v1",
+    "VITE_NPC_API_KEY": "app-R4FHtuNaBdtN9LzCgECSMUqS"
+  }
 }
