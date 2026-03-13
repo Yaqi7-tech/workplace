@@ -165,6 +165,8 @@ export class WorkplaceApiService {
       console.log('使用场景:', scenarioTitle, '=>', scenario);
     }
 
+    console.log('发送给NPC API的inputs:', JSON.stringify(inputs, null, 2));
+
     const response = await this.callDifyAPI(
       config.url,
       config.key,
