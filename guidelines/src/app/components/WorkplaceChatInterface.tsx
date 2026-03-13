@@ -196,14 +196,8 @@ export function WorkplaceChatInterface({
 
     try {
       // 调用 NPC API，获取消息和情绪数据
-      // 传递当前对话历史（不包括当前这条新消息）
-      const chatHistory: ChatMessageItem[] = messages.map(m => ({
-        role: m.role,
-        content: m.content,
-        timestamp: m.timestamp
-      }));
-
-      const npcResponse = await workplaceApiService.callNPC(userReply, persona.title, scenario.title, chatHistory);
+      // Dify 通过 conversation_id 自动维护对话历史
+      const npcResponse = await workplaceApiService.callNPC(userReply, persona.title, scenario.title);
 
       // 过滤掉 NPC 回复中的状态变量数据（JSON 格式）
       const cleanMessage = npcResponse.message.replace(/\{[\s\S]*?session_emotion_timeline[\s\S]*?\}/g, '').trim();

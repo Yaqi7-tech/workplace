@@ -141,7 +141,7 @@ export class WorkplaceApiService {
   }
 
   // 调用 NPC API（带教老师）
-  async callNPC(message: string, personaTitle: string, scenarioTitle?: string, chatHistory?: ChatMessageItem[]): Promise<NPCResponse> {
+  async callNPC(message: string, personaTitle: string, scenarioTitle?: string): Promise<NPCResponse> {
     const config = getApiConfig().npc;
 
     console.log('使用NPC人设:', personaTitle);
@@ -156,16 +156,6 @@ export class WorkplaceApiService {
 
     if (scenarioTitle) {
       inputs.scenario = scenarioTitle;
-    }
-
-    // 添加对话历史到 inputs
-    if (chatHistory && chatHistory.length > 0) {
-      const historyText = chatHistory.map(msg => {
-        const role = msg.role === 'user' ? '职场新人' : '带教老师';
-        return `${role}: ${msg.content}`;
-      }).join('\n\n');
-      inputs.chat_history = historyText;
-      console.log('添加对话历史到 NPC API, 对话轮数:', chatHistory.length / 2);
     }
 
     console.log('发送给NPC API的inputs:', JSON.stringify(inputs, null, 2));
