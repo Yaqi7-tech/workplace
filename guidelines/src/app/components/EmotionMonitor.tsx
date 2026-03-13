@@ -37,14 +37,15 @@ const EMOTION_ORDER = ['愤怒', '焦虑', '紧张', '轻视', '困惑', '失望
 
 export function EmotionMonitor({ emotionTimeline, stressCurve, emotionCurve }: EmotionMonitorProps) {
   // 处理数据用于图表显示
+  // 压力值范围 0-1，情绪值范围 -1 到 1
   const processedStressData = stressCurve.map(d => ({
     turn: `轮${d.turn}`,
-    value: Math.round(d.value * 100)
+    value: d.value // 保持原始值 0-1
   }));
 
   const processedEmotionData = emotionCurve.map(d => ({
     turn: `轮${d.turn}`,
-    value: Math.round((d.value + 50) * 2) // 将 -50~50 映射到 0~100
+    value: d.value // 保持原始值 -1 到 1
   }));
 
   // 计算当前情绪分布
@@ -127,7 +128,8 @@ export function EmotionMonitor({ emotionTimeline, stressCurve, emotionCurve }: E
                 axisLine={false}
                 tickLine={false}
                 tick={{ fontSize: 9, fill: 'rgb(122,122,122)' }}
-                domain={[0, 100]}
+                domain={[0, 1]}
+                tickFormatter={(value) => value.toFixed(1)}
               />
               <Tooltip
                 content={({ active, payload }) => {
@@ -135,7 +137,7 @@ export function EmotionMonitor({ emotionTimeline, stressCurve, emotionCurve }: E
                     return (
                       <div className="bg-white border border-gray-200 rounded-lg px-2 py-1 shadow-lg">
                         <p className="text-xs text-[rgb(45,45,45)]">{`轮次: ${payload[0].payload.turn}`}</p>
-                        <p className="text-xs font-semibold" style={{ color: 'rgb(249,127,95)' }}>{`压力: ${payload[0].value}%`}</p>
+                        <p className="text-xs font-semibold" style={{ color: 'rgb(249,127,95)' }}>{`压力: ${(payload[0].value).toFixed(2)}`}</p>
                       </div>
                     );
                   }
@@ -181,15 +183,18 @@ export function EmotionMonitor({ emotionTimeline, stressCurve, emotionCurve }: E
                 axisLine={false}
                 tickLine={false}
                 tick={{ fontSize: 9, fill: 'rgb(122,122,122)' }}
-                domain={[0, 100]}
+                domain={[-1, 1]}
+                tickFormatter={(value) => value.toFixed(1)}
               />
               <Tooltip
                 content={({ active, payload }) => {
                   if (active && payload && payload.length) {
+                    const value = payload[0].value;
+                    const emotionLabel = value > 0.3 ? '积极' : value < -0.3 ? '消极' : '中性';
                     return (
                       <div className="bg-white border border-gray-200 rounded-lg px-2 py-1 shadow-lg">
                         <p className="text-xs text-[rgb(45,45,45)]">{`轮次: ${payload[0].payload.turn}`}</p>
-                        <p className="text-xs font-semibold" style={{ color: 'rgb(60,155,201)' }}>{`强度: ${payload[0].value}%`}</p>
+                        <p className="text-xs font-semibold" style={{ color: 'rgb(60,155,201)' }}>{`强度: ${value.toFixed(2)} (${emotionLabel})`}</p>
                       </div>
                     );
                   }

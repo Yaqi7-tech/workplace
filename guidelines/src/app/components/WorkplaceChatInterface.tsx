@@ -75,10 +75,10 @@ export function WorkplaceChatInterface({
       { turn: turnCount, value: Math.random() * 0.8 + 0.1 }
     ];
 
-    // 生成新的情感强度数据点（-50到50之间）
+    // 生成新的情感强度数据点（-1到1之间）
     const newEmotionCurve = [
       ...(prevData.emotion_curve || []),
-      { turn: turnCount, value: Math.random() * 100 - 50 }
+      { turn: turnCount, value: Math.random() * 2 - 1 }
     ];
 
     return {
@@ -205,9 +205,12 @@ export function WorkplaceChatInterface({
 
       const npcResponse = await workplaceApiService.callNPC(userReply, persona.title, scenario.title, chatHistory);
 
+      // 过滤掉 NPC 回复中的状态变量数据（JSON 格式）
+      const cleanMessage = npcResponse.message.replace(/\{[\s\S]*?session_emotion_timeline[\s\S]*?\}/g, '').trim();
+
       const assistantMessage: Message = {
         role: 'assistant',
-        content: npcResponse.message,
+        content: cleanMessage,
         timestamp: new Date()
       };
 
