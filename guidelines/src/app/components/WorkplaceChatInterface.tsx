@@ -333,16 +333,85 @@ export function WorkplaceChatInterface({
       {/* Main Content */}
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-4xl mx-auto px-6 py-8 space-y-6">
-          {/* 初始提示 */}
+          {/* 场景和人设详情 - 仅在开始对话后且没有消息时显示 */}
           {messages.length === 0 && (
-            <div className="text-center py-12">
-              <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: 'rgba(60,155,201,0.2)' }}>
-                <Send className="w-8 h-8" style={{ color: THEME_COLORS.blue }} />
+            <div className="space-y-6">
+              {/* 标题提示 */}
+              <div className="text-center py-6">
+                <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: 'rgba(60,155,201,0.2)' }}>
+                  <Send className="w-8 h-8" style={{ color: THEME_COLORS.blue }} />
+                </div>
+                <h3 className="text-lg font-semibold text-[rgb(45,45,45)] mb-2">请发送你的开场白</h3>
+                <p className="text-[rgb(122,122,122)] text-sm">
+                  根据下方场景和带教老师人设，思考你会如何开始对话
+                </p>
               </div>
-              <h3 className="text-lg font-semibold text-[rgb(45,45,45)] mb-2">请发送你的开场白</h3>
-              <p className="text-[rgb(122,122,122)] text-sm max-w-md mx-auto">
-                根据场景中的具体事件，思考你会如何回应带教老师。这是真实职场情境的模拟，请自然地表达你的想法。
-              </p>
+
+              {/* 场景详情卡片 */}
+              <div className="bg-white rounded-2xl border-2 overflow-hidden" style={{ borderColor: 'rgba(60,155,201,0.15)' }}>
+                {/* 场景标题 */}
+                <div className="px-6 py-4" style={{ backgroundColor: scenario.color + '22' }}>
+                  <div className="flex items-center gap-3">
+                    <span className="text-3xl">{scenario.icon}</span>
+                    <div>
+                      <h4 className="text-xl font-bold text-[rgb(45,45,45)]">{scenario.title}</h4>
+                      <p className="text-sm text-[rgb(122,122,122)]">与 {persona.title} 的带教老师对话</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 背景情境 */}
+                <div className="p-6 border-b" style={{ borderColor: 'rgba(60,155,201,0.1)' }}>
+                  <h5 className="text-sm font-semibold text-[rgb(45,45,45)] mb-3 flex items-center gap-2">
+                    <Sparkles className="w-4 h-4" style={{ color: THEME_COLORS.blue }} />
+                    背景情境
+                  </h5>
+                  <p className="text-[rgb(45,45,45)] leading-relaxed">{scenario.background}</p>
+                </div>
+
+                {/* 具体事件 */}
+                <div className="p-6" style={{ backgroundColor: 'rgb(254,225,153,0.3)' }}>
+                  <h5 className="text-sm font-semibold mb-3 flex items-center gap-2" style={{ color: 'rgb(249,127,95)' }}>
+                    📋 具体事件
+                  </h5>
+                  <p className="leading-relaxed" style={{ color: 'rgb(45,45,45)' }}>{scenario.event}</p>
+                </div>
+              </div>
+
+              {/* 人设详情卡片 */}
+              <div className="bg-white rounded-2xl border-2 overflow-hidden" style={{ borderColor: persona.color + '40' }}>
+                <div className="p-6" style={{ backgroundColor: persona.color + '22' }}>
+                  <div className="flex items-center gap-3 mb-4">
+                    <span className="text-3xl">{persona.icon}</span>
+                    <h4 className="text-xl font-bold text-[rgb(45,45,45)]">👤 带教老师人设</h4>
+                  </div>
+
+                  {/* 人设特征 */}
+                  <div className="mb-4">
+                    <h5 className="text-sm font-semibold text-[rgb(45,45,45)] mb-2">特征</h5>
+                    <p className="text-[rgb(45,45,45)] leading-relaxed">{persona.characteristics}</p>
+                  </div>
+
+                  {/* 口头禅 */}
+                  <div className="mb-4">
+                    <h5 className="text-sm font-semibold text-[rgb(45,45,45)] mb-2">口头禅</h5>
+                    <p className="text-[rgb(122,122,122)] italic">{persona.catchphrase}</p>
+                  </div>
+
+                  {/* 行为红线 */}
+                  <div>
+                    <h5 className="text-sm font-semibold text-[rgb(45,45,45)] mb-2">行为规则</h5>
+                    <p className="text-sm text-[rgb(122,122,122)] leading-relaxed">{persona.behaviorRule}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* 输入提示 */}
+              <div className="text-center py-4">
+                <p className="text-sm text-[rgb(122,122,122)]">
+                  在下方输入框中输入你的开场白，开始与带教老师的对话
+                </p>
+              </div>
             </div>
           )}
 
