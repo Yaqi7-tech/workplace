@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { ArrowLeft, Send, Sparkles, Lightbulb, TrendingUp, AlertTriangle, Shield, X } from 'lucide-react';
+import { ArrowLeft, Send, Sparkles, Lightbulb, TrendingUp, AlertTriangle, Shield, Loader2 } from 'lucide-react';
 import { Button } from '@/app/components/ui/button';
 import {
   SCENARIO_CARDS,
@@ -53,7 +53,7 @@ export function WorkplaceChatInterface({
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, hint]);
 
   // 生成结构化数据
   const generateStructuredData = (): StructuredData => {
@@ -73,6 +73,15 @@ export function WorkplaceChatInterface({
       ]
     };
   };
+
+  // 自动获取提示 - NPC回复后自动调用
+  useEffect(() => {
+    const lastMessage = messages[messages.length - 1];
+    if (lastMessage && lastMessage.role === 'assistant' && !isLoading) {
+      // NPC回复后自动获取提示
+      fetchHint();
+    }
+  }, [messages]);
 
   // 获取提示
   const fetchHint = async () => {
@@ -139,8 +148,8 @@ export function WorkplaceChatInterface({
       timestamp: new Date()
     };
 
+    // 清空提示，但不清空督导反馈（保留在侧边栏）
     setHint('');
-    setSupervisorFeedback(null);
 
     setMessages(prev => [...prev, userMessage]);
     const userReply = inputValue.trim();
@@ -148,11 +157,8 @@ export function WorkplaceChatInterface({
     setIsLoading(true);
 
     try {
-      // 构建NPC人设字符串
-      const npcPersona = `${persona.title}的带教老师\n特征：${persona.characteristics}\n${persona.catchphrase}\n${persona.behaviorRule}`;
-
-      // 调用 NPC API（传递 npc_persona 参数）
-      const response = await workplaceApiService.callNPC(userReply, npcPersona);
+      // 传递人设标题，API内部会映射到正确的格式
+      const response = await workplaceApiService.callNPC(userReply, persona.title);
 
       const assistantMessage: Message = {
         role: 'assistant',
@@ -273,6 +279,7 @@ export function WorkplaceChatInterface({
                 <ul className="text-sm space-y-2" style={{ color: THEME_COLORS.blue }}>
                   <li>• 右侧督导面板会实时分析你的回复</li>
                   <li>• 每轮对话后会显示风险判定和改进建议</li>
+                  <li>• NPC回复后会自动生成回复提示</li>
                 </ul>
               </div>
             </div>
@@ -326,7 +333,7 @@ export function WorkplaceChatInterface({
         {/* Messages */}
         <div className="flex-1 overflow-y-auto">
           <div className="max-w-4xl mx-auto px-6 py-8 space-y-6">
-            {/* 场景详情 - 只在开始时显示一次 */}
+            {/* 场景详情 - 只在开始时显示 */}
             {messages.length === 0 && (
               <div className="space-y-4">
                 <div className="text-center py-4">
@@ -350,7 +357,7 @@ export function WorkplaceChatInterface({
                     </div>
                     <div className="p-4 rounded-lg" style={{ backgroundColor: 'rgb(254,225,153,0.3)' }}>
                       <h5 className="text-xs font-semibold mb-2" style={{ color: 'rgb(249,127,95)' }}>📋 具体事件</h5>
-                      <p className="text-sm" style={{ color: 'rgb(45,45,45)' }}>{scenario.event}</p>
+                      <p className="text-sm" style={{ color: 'rgb(45,45,45)] }}>{scenario.event}</p>
                     </div>
                     <div>
                       <h5 className="text-xs font-semibold text-[rgb(122,122,122)] mb-2">👤 带教老师：{persona.title}</h5>
@@ -394,45 +401,39 @@ export function WorkplaceChatInterface({
           </div>
         </div>
 
-        {/* Hint Panel */}
+        {/* Hint Panel - NPC回复后自动显示 */}
         {!isLoading && messages.length > 0 && (
           <div className="bg-white border-t-2 shrink-0" style={{ borderColor: 'rgba(60,155,201,0.15)' }}>
             <div className="max-w-4xl mx-auto px-6 py-4">
-              <div className="rounded-xl p-4" style={{ backgroundColor: 'rgb(254,225,153,0.3)', border: '1px solid rgb(254,225,153)' }}>
-                <div className="flex items-start gap-3">
-                  <Lightbulb className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: 'rgb(249,127,95)' }} />
-                  <div className="flex-1">
-                    <h4 className="text-sm font-semibold mb-2" style={{ color: 'rgb(249,127,95)' }}>💡 回复建议</h4>
-                    {isLoadingHint ? (
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full animate-bounce" style={{ backgroundColor: 'rgb(249,127,95)' }} />
-                        <span className="text-sm" style={{ color: 'rgb(249,127,95)' }}>正在生成提示...</span>
-                      </div>
-                    ) : hint ? (
-                      <>
-                        <p className="text-sm leading-relaxed mb-3" style={{ color: 'rgb(45,45,45)' }}>{hint}</p>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={useHint}
-                          className="text-xs hover:bg-[rgb(60,155,201,0.1)]"
-                          style={{ color: THEME_COLORS.blue }}
-                        >
-                          使用此建议
-                        </Button>
-                      </>
-                    ) : (
-                      <button
-                        onClick={fetchHint}
-                        className="text-sm underline hover:opacity-70"
-                        style={{ color: THEME_COLORS.blue }}
-                      >
-                        点击获取回复建议
-                      </button>
-                    )}
+              {isLoadingHint ? (
+                <div className="rounded-xl p-4" style={{ backgroundColor: 'rgb(254,225,153,0.2)', border: '1px solid rgb(254,225,153)' }}>
+                  <div className="flex items-center gap-3">
+                    <Loader2 className="w-5 h-5 animate-spin" style={{ color: 'rgb(249,127,95)' }} />
+                    <div>
+                      <h4 className="text-sm font-semibold" style={{ color: 'rgb(249,127,95)' }}>💡 正在生成回复建议...</h4>
+                    </div>
                   </div>
                 </div>
-              </div>
+              ) : hint ? (
+                <div className="rounded-xl p-4" style={{ backgroundColor: 'rgb(254,225,153,0.3)', border: '1px solid rgb(254,225,153)' }}>
+                  <div className="flex items-start gap-3">
+                    <Lightbulb className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: 'rgb(249,127,95)' }} />
+                    <div className="flex-1">
+                      <h4 className="text-sm font-semibold mb-2" style={{ color: 'rgb(249,127,95)' }}>💡 回复建议</h4>
+                      <p className="text-sm leading-relaxed mb-3" style={{ color: 'rgb(45,45,45)' }}>{hint}</p>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={useHint}
+                        className="text-xs hover:bg-[rgb(60,155,201,0.1)]"
+                        style={{ color: THEME_COLORS.blue }}
+                      >
+                        使用此建议
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ) : null}
             </div>
           </div>
         )}
@@ -441,17 +442,19 @@ export function WorkplaceChatInterface({
         <div className="bg-white border-t-2 shrink-0" style={{ borderColor: 'rgba(60,155,201,0.15)' }}>
           <div className="max-w-4xl mx-auto px-6 py-4">
             <div className="flex items-end gap-3">
-              <textarea
-                ref={inputRef}
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="输入你的回复... (Shift+Enter 换行，Enter 发送)"
-                className="flex-1 min-h-[60px] max-h-[150px] px-4 py-3 pr-12 rounded-xl border-2 focus:border-[rgb(60,155,201)] focus:ring-2 outline-none resize-none text-sm"
-                style={{ borderColor: 'rgba(60,155,201,0.2)', backgroundColor: 'rgb(254,254,250)' }}
-                disabled={isLoading}
-              />
-              <div className="absolute bottom-3 right-3 text-xs text-[rgb(122,122,122)]">{inputValue.length} 字</div>
+              <div className="flex-1 relative">
+                <textarea
+                  ref={inputRef}
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder="输入你的回复... (Shift+Enter 换行，Enter 发送)"
+                  className="w-full min-h-[60px] max-h-[150px] px-4 py-3 pr-12 rounded-xl border-2 focus:border-[rgb(60,155,201)] focus:ring-2 outline-none resize-none text-sm"
+                  style={{ borderColor: 'rgba(60,155,201,0.2)', backgroundColor: 'rgb(254,254,250)' }}
+                  disabled={isLoading}
+                />
+                <div className="absolute bottom-3 right-3 text-xs text-[rgb(122,122,122)]">{inputValue.length} 字</div>
+              </div>
               <Button
                 size="lg"
                 onClick={handleSendMessage}
@@ -484,62 +487,64 @@ export function WorkplaceChatInterface({
             onClick={() => setShowSupervisor(!showSupervisor)}
             className="h-8 w-8 p-0 hover:bg-[rgb(60,155,201,0.1)]"
           >
-            {showSupervisor ? <X className="w-4 h-4" style={{ color: THEME_COLORS.blue }} /> : <TrendingUp className="w-4 h-4" style={{ color: THEME_COLORS.blue }} />}
+            {showSupervisor ? <span className="text-2xl" style={{ color: THEME_COLORS.blue }}>&minus;</span> : <span className="text-2xl" style={{ color: THEME_COLORS.blue }}>&plus;</span>}
           </Button>
         </div>
 
-        {/* 督导内容 */}
-        <div className="flex-1 overflow-y-auto p-5 space-y-4">
-          {!supervisorFeedback ? (
-            <div className="text-center py-12">
-              <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: 'rgba(60,155,201,0.1)' }}>
-                <TrendingUp className="w-8 h-8" style={{ color: THEME_COLORS.blue }} />
-              </div>
-              <p className="text-sm text-[rgb(122,122,122)]">
-                发送消息后，督导会分析你的回复并提供反馈
-              </p>
-            </div>
-          ) : (
-            <>
-              {/* 风险判定 */}
-              <div className="rounded-xl p-4 border-2" style={{ backgroundColor: 'rgb(252,117,123,0.15)', borderColor: 'rgb(252,117,123,0.4)' }}>
-                <div className="flex items-center gap-2 mb-3">
-                  <AlertTriangle className="w-4 h-4" style={{ color: 'rgb(252,117,123)' }} />
-                  <h4 className="text-sm font-semibold" style={{ color: 'rgb(252,117,123)' }}>风险判定</h4>
+        {/* 督导内容 - 可折叠 */}
+        {showSupervisor && (
+          <div className="flex-1 overflow-y-auto p-5 space-y-4">
+            {!supervisorFeedback ? (
+              <div className="text-center py-12">
+                <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: 'rgba(60,155,201,0.1)' }}>
+                  <TrendingUp className="w-8 h-8" style={{ color: THEME_COLORS.blue }} />
                 </div>
-                <p className="text-sm leading-relaxed" style={{ color: 'rgb(45,45,45)' }}>
-                  {supervisorFeedback.risk_assessment || '暂无判定'}
+                <p className="text-sm text-[rgb(122,122,122)]">
+                  发送消息后，督导会分析你的回复并提供反馈
                 </p>
               </div>
-
-              {/* 雷区定位 */}
-              {supervisorFeedback.risk_zone && (
-                <div className="rounded-xl p-4 border-2" style={{ backgroundColor: 'rgb(249,127,95,0.15)', borderColor: 'rgb(249,127,95,0.4)' }}>
+            ) : (
+              <>
+                {/* 风险判定 */}
+                <div className="rounded-xl p-4 border-2" style={{ backgroundColor: 'rgb(252,117,123,0.15)', borderColor: 'rgb(252,117,123,0.4)' }}>
                   <div className="flex items-center gap-2 mb-3">
-                    <AlertTriangle className="w-4 h-4" style={{ color: 'rgb(249,127,95)' }} />
-                    <h4 className="text-sm font-semibold" style={{ color: 'rgb(249,127,95)' }}>雷区定位</h4>
+                    <AlertTriangle className="w-4 h-4" style={{ color: 'rgb(252,117,123)' }} />
+                    <h4 className="text-sm font-semibold" style={{ color: 'rgb(252,117,123)' }}>风险判定</h4>
                   </div>
-                  <p className="text-sm leading-relaxed" style={{ color: 'rgb(45,45,45)' }}>
-                    {supervisorFeedback.risk_zone}
+                  <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: 'rgb(45,45,45)]' }}>
+                    {supervisorFeedback.risk_assessment || '暂无判定'}
                   </p>
                 </div>
-              )}
 
-              {/* 安全替换 */}
-              {supervisorFeedback.safe_alternative && (
-                <div className="rounded-xl p-4 border-2" style={{ backgroundColor: 'rgb(176,214,169,0.2)', borderColor: 'rgb(176,214,169,0.5)' }}>
-                  <div className="flex items-center gap-2 mb-3">
-                    <Shield className="w-4 h-4" style={{ color: 'rgb(60,155,201)' }} />
-                    <h4 className="text-sm font-semibold" style={{ color: 'rgb(60,155,201)' }}>安全替换</h4>
+                {/* 雷区定位 */}
+                {supervisorFeedback.risk_zone && (
+                  <div className="rounded-xl p-4 border-2" style={{ backgroundColor: 'rgb(249,127,95,0.15)', borderColor: 'rgb(249,127,95,0.4)' }}>
+                    <div className="flex items-center gap-2 mb-3">
+                      <AlertTriangle className="w-4 h-4" style={{ color: 'rgb(249,127,95)' }} />
+                      <h4 className="text-sm font-semibold" style={{ color: 'rgb(249,127,95)' }}>雷区定位</h4>
+                    </div>
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: 'rgb(45,45,45)]' }}>
+                      {supervisorFeedback.risk_zone}
+                    </p>
                   </div>
-                  <p className="text-sm leading-relaxed" style={{ color: 'rgb(45,45,45)' }}>
-                    {supervisorFeedback.safe_alternative}
-                  </p>
-                </div>
-              )}
-            </>
-          )}
-        </div>
+                )}
+
+                {/* 安全替换 */}
+                {supervisorFeedback.safe_alternative && (
+                  <div className="rounded-xl p-4 border-2" style={{ backgroundColor: 'rgb(176,214,169,0.2)', borderColor: 'rgb(176,214,169,0.5)' }}>
+                    <div className="flex items-center gap-2 mb-3">
+                      <Shield className="w-4 h-4" style={{ color: 'rgb(60,155,201)' }} />
+                      <h4 className="text-sm font-semibold" style={{ color: 'rgb(60,155,201)' }}>安全替换</h4>
+                    </div>
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: 'rgb(45,45,45)]' }}>
+                      {supervisorFeedback.safe_alternative}
+                    </p>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
