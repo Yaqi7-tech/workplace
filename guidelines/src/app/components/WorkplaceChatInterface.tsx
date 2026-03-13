@@ -239,7 +239,7 @@ export function WorkplaceChatInterface({
               <ArrowLeft className="w-4 h-4 mr-2" style={{ color: THEME_COLORS.blue }} />
               返回
             </Button>
-            <h2 className="text-lg font-semibold text-[rgb(45,45,45)]">
+            <h2 className="text-lg font-semibold text-[rgb(45,45,45)'">
               {scenario.title} × {persona.title}
             </h2>
             <div className="w-20" />
@@ -254,7 +254,7 @@ export function WorkplaceChatInterface({
                   {scenario.icon}
                 </div>
                 <div>
-                  <h1 className="text-2xl font-bold text-[rgb(45,45,45)] mb-1">{scenario.title}</h1>
+                  <h1 className="text-2xl font-bold text-[rgb(45,45,45)' mb-1">{scenario.title}</h1>
                   <p className="text-[rgb(122,122,122)]">与 {persona.title} 的带教老师对话</p>
                 </div>
               </div>
@@ -262,11 +262,11 @@ export function WorkplaceChatInterface({
 
             <div className="p-8 space-y-6">
               <div className="p-6 rounded-xl" style={{ backgroundColor: 'rgb(254,254,250)' }}>
-                <h3 className="text-sm font-semibold text-[rgb(45,45,45)] mb-3 flex items-center gap-2">
+                <h3 className="text-sm font-semibold text-[rgb(45,45,45)' mb-3 flex items-center gap-2">
                   <Sparkles className="w-4 h-4" style={{ color: THEME_COLORS.blue }} />
                   背景情境
                 </h3>
-                <p className="text-[rgb(45,45,45)] leading-relaxed">{scenario.background}</p>
+                <p className="text-[rgb(45,45,45)' leading-relaxed">{scenario.background}</p>
               </div>
 
               <div className="p-6 rounded-xl border-2" style={{ backgroundColor: 'rgb(254,225,153,0.4)', borderColor: 'rgb(254,225,153)' }}>
@@ -277,8 +277,8 @@ export function WorkplaceChatInterface({
               </div>
 
               <div className="p-6 rounded-xl" style={{ backgroundColor: 'rgb(254,254,250)' }}>
-                <h3 className="text-sm font-semibold text-[rgb(45,45,45)] mb-3">👤 带教老师人设</h3>
-                <p className="text-[rgb(45,45,45)] leading-relaxed mb-3">{persona.characteristics}</p>
+                <h3 className="text-sm font-semibold text-[rgb(45,45,45)' mb-3">👤 带教老师人设</h3>
+                <p className="text-[rgb(45,45,45)' leading-relaxed mb-3">{persona.characteristics}</p>
                 <p className="text-[rgb(122,122,122)] italic text-sm">{persona.catchphrase}</p>
               </div>
 
@@ -317,21 +317,21 @@ export function WorkplaceChatInterface({
       <div className="w-80 border-r-2 flex flex-col bg-white shrink-0 overflow-y-auto" style={{ borderColor: 'rgba(60,155,201,0.15)' }}>
         {/* 顶部标题 */}
         <div className="px-4 py-3 border-b-2 shrink-0" style={{ borderColor: 'rgba(60,155,201,0.1)' }}>
-          <h3 className="font-semibold text-sm text-[rgb(45,45,45)]">背景信息</h3>
+          <h3 className="font-semibold text-sm text-[rgb(45,45,45)'">背景信息</h3>
         </div>
 
         {/* 场景信息 */}
         <div className="p-4 border-b-2" style={{ borderColor: 'rgba(60,155,201,0.1)' }}>
           <div className="flex items-center gap-2 mb-3">
             <span className="text-xl">{scenario.icon}</span>
-            <h4 className="font-semibold text-sm text-[rgb(45,45,45)]">{scenario.title}</h4>
+            <h4 className="font-semibold text-sm text-[rgb(45,45,45)'">{scenario.title}</h4>
           </div>
           <div className="rounded-lg p-3 border" style={{ backgroundColor: 'rgb(254,225,153,0.25)', borderColor: 'rgb(254,225,153,0.5)' }}>
             <div className="flex items-center gap-1 mb-2">
               <BookOpen className="w-3 h-3" style={{ color: 'rgb(249,127,95)' }} />
               <span className="text-xs font-semibold" style={{ color: 'rgb(249,127,95)' }}>具体事件</span>
             </div>
-            <p className="text-xs leading-relaxed text-[rgb(45,45,45)]">{scenario.event}</p>
+            <p className="text-xs leading-relaxed text-[rgb(45,45,45)'">{scenario.event}</p>
           </div>
         </div>
 
@@ -339,14 +339,14 @@ export function WorkplaceChatInterface({
         <div className="p-4">
           <div className="flex items-center gap-2 mb-3">
             <span className="text-xl">{persona.icon}</span>
-            <h4 className="font-semibold text-sm text-[rgb(45,45,45)]">{persona.title}</h4>
+            <h4 className="font-semibold text-sm text-[rgb(45,45,45)'">{persona.title}</h4>
           </div>
           <div className="rounded-lg p-3 border" style={{ backgroundColor: 'rgb(254,254,250)', borderColor: 'rgba(60,155,201,0.2)' }}>
             <div className="flex items-center gap-1 mb-2">
               <User className="w-3 h-3" style={{ color: THEME_COLORS.blue }} />
-              <span className="text-xs font-semibold text-[rgb(45,45,45)]">带教老师人设</span>
+              <span className="text-xs font-semibold text-[rgb(45,45,45)'">带教老师人设</span>
             </div>
-            <p className="text-xs leading-relaxed text-[rgb(45,45,45)]">{persona.characteristics}</p>
+            <p className="text-xs leading-relaxed text-[rgb(45,45,45)'">{persona.characteristics}</p>
           </div>
         </div>
       </div>
@@ -361,7 +361,7 @@ export function WorkplaceChatInterface({
               返回
             </Button>
             <div className="text-center">
-              <h2 className="text-base font-semibold text-[rgb(45,45,45)]">
+              <h2 className="text-base font-semibold text-[rgb(45,45,45)'">
                 已进行 {Math.ceil(messages.length / 2)} 轮对话
               </h2>
             </div>
@@ -376,7 +376,6 @@ export function WorkplaceChatInterface({
             </Button>
           </div>
         </div>
-        </div>
 
         {/* Messages */}
         <div className="flex-1 overflow-y-auto">
@@ -387,7 +386,7 @@ export function WorkplaceChatInterface({
                 <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: 'rgba(60,155,201,0.2)' }}>
                   <Send className="w-8 h-8" style={{ color: THEME_COLORS.blue }} />
                 </div>
-                <h3 className="text-lg font-semibold text-[rgb(45,45,45)] mb-2">请发送你的开场白</h3>
+                <h3 className="text-lg font-semibold text-[rgb(45,45,45)' mb-2">请发送你的开场白</h3>
                 <p className="text-sm text-[rgb(122,122,122)]">
                   根据上方显示的场景和带教老师人设，开始对话
                 </p>
@@ -399,7 +398,7 @@ export function WorkplaceChatInterface({
               <div key={index} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                 <div
                   className={`max-w-2xl rounded-2xl px-5 py-3 ${
-                    message.role === 'user' ? 'text-white' : 'bg-white border-2 text-[rgb(45,45,45)]'
+                    message.role === 'user' ? 'text-white' : 'bg-white border-2 text-[rgb(45,45,45)''
                   }`}
                   style={message.role === 'user' ? { backgroundColor: THEME_COLORS.blue } : { borderColor: 'rgba(60,155,201,0.15)' }}
                 >
@@ -443,7 +442,7 @@ export function WorkplaceChatInterface({
                   <div className="flex items-start gap-2">
                     <Lightbulb className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: 'rgb(249,127,95)' }} />
                     <div className="flex-1">
-                      <p className="text-sm leading-relaxed mr-3" style={{ color: 'rgb(45,45,45)]' }}>{hint}</p>
+                      <p className="text-sm leading-relaxed mr-3" style={{ color: 'rgb(45,45,45)' }}>{hint}</p>
                       <Button
                         size="sm"
                         variant="ghost"
@@ -500,7 +499,7 @@ export function WorkplaceChatInterface({
         <div className="px-5 py-3 border-b-2 flex items-center justify-between" style={{ borderColor: 'rgba(60,155,201,0.1)' }}>
           <div className="flex items-center gap-2">
             <TrendingUp className="w-4 h-4" style={{ color: THEME_COLORS.blue }} />
-            <h3 className="font-semibold text-sm text-[rgb(45,45,45)]">职场社交督导</h3>
+            <h3 className="font-semibold text-sm text-[rgb(45,45,45)'">职场社交督导</h3>
           </div>
         </div>
 
@@ -523,7 +522,7 @@ export function WorkplaceChatInterface({
                   <AlertTriangle className="w-4 h-4" style={{ color: 'rgb(252,117,123)' }} />
                   <h4 className="text-sm font-semibold" style={{ color: 'rgb(252,117,123)' }}>风险判定</h4>
                 </div>
-                <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: 'rgb(45,45,45)]' }}>
+                <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: 'rgb(45,45,45)'' }}>
                   {supervisorFeedback.risk_assessment || '暂无判定'}
                 </p>
               </div>
@@ -535,7 +534,7 @@ export function WorkplaceChatInterface({
                     <AlertTriangle className="w-4 h-4" style={{ color: 'rgb(249,127,95)' }} />
                     <h4 className="text-sm font-semibold" style={{ color: 'rgb(249,127,95)' }}>雷区定位</h4>
                   </div>
-                  <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: 'rgb(45,45,45)]' }}>
+                  <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: 'rgb(45,45,45)'' }}>
                     {supervisorFeedback.risk_zone}
                   </p>
                 </div>
@@ -548,7 +547,7 @@ export function WorkplaceChatInterface({
                     <Shield className="w-4 h-4" style={{ color: 'rgb(60,155,201)' }} />
                     <h4 className="text-sm font-semibold" style={{ color: 'rgb(60,155,201)' }}>安全替换</h4>
                   </div>
-                  <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: 'rgb(45,45,45)]' }}>
+                  <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: 'rgb(45,45,45)'' }}>
                     {supervisorFeedback.safe_alternative}
                   </p>
                 </div>
