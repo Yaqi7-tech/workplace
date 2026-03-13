@@ -31,11 +31,11 @@ export interface HintResponse {
   suggestions?: string[];
 }
 
-// Supervisor API 响应类型
-export interface SupervisorResponse {
-  feedback: string;
-  score?: number;
-  improvements?: string[];
+// 督导反馈结构化类型
+export interface SupervisorFeedback {
+  risk_assessment: string;    // 风险判定
+  risk_zone: string;          // 雷区定位
+  safe_alternative: string;   // 安全替换
 }
 
 const getApiConfig = () => {
@@ -82,6 +82,8 @@ export class WorkplaceApiService {
       payload: difyPayload
     };
 
+    console.log('API调用参数:', { apiUrl, query: query.substring(0, 100) + '...', inputs });
+
     for (let attempt = 0; attempt <= retries; attempt++) {
       try {
         const controller = new AbortController();
@@ -98,6 +100,7 @@ export class WorkplaceApiService {
 
         if (!response.ok) {
           const errorText = await response.text();
+          console.error('API错误响应:', errorText);
           throw new Error(`API请求失败: ${response.status} ${errorText}`);
         }
 
@@ -114,10 +117,12 @@ export class WorkplaceApiService {
     throw new Error('Unexpected error');
   }
 
-  // 调用 NPC API（带教老师）
-  async callNPC(message: string, systemPrompt?: string): Promise<string> {
+  // 调用 NPC API（带教老师）- 需要 npc_persona 参数
+  async callNPC(message: string, npcPersona: string): Promise<string> {
     const config = getApiConfig().npc;
-    const inputs = systemPrompt ? { system_prompt: systemPrompt } : {};
+
+    // NPC API 需要 npc_persona 输入参数
+    const inputs = { npc_persona: npcPersona };
 
     const response = await this.callDifyAPI(
       config.url,
@@ -180,29 +185,68 @@ ${structuredDataText}
         this.hintConversationId = response.conversation_id;
       }
 
-      // 解析响应
+      // 解析响应 - Hint API 可能返回 JSON 或纯文本
       const answer = response.answer;
 
-      // 尝试提取JSON格式的提示
-      const jsonMatch = answer.match(/\{[\s\S]*?\}/);
-      if (jsonMatch) {
-        try {
-          const parsed = JSON.parse(jsonMatch[0]);
-          return {
-            hint: parsed.hint || answer,
-            suggestions: parsed.suggestions || []
-          };
-        } catch {
-          // JSON解析失败，返回原始响应
-        }
+      // 尝试提取 hint 字段
+      const hintMatch = answer.match(/"hint"\s*:\s*"([^"]+)"/);
+      if (hintMatch) {
+        return { hint: hintMatch[1] };
       }
 
       return { hint: answer };
     } catch (error) {
       console.error('Hint API调用失败:', error);
-      // 返回默认提示
       return { hint: '请根据当前情境，思考如何回应带教老师。注意保持礼貌和专业。' };
     }
+  }
+
+  // 解析督导反馈 - 提取三个模块
+  private parseSupervisorFeedback(text: string): SupervisorFeedback {
+    const feedback: SupervisorFeedback = {
+      risk_assessment: '',
+      risk_zone: '',
+      safe_alternative: ''
+    };
+
+    // 提取【风险判定】
+    const riskMatch = text.match(/【风险判定】\s*([\s\S]*?)(?=【雷区定位】|$)/);
+    if (riskMatch) {
+      feedback.risk_assessment = riskMatch[1].trim();
+    }
+
+    // 提取【雷区定位】
+    const zoneMatch = text.match(/【雷区定位】\s*([\s\S]*?)(?=【安全替换】|$)/);
+    if (zoneMatch) {
+      feedback.risk_zone = zoneMatch[1].trim();
+    }
+
+    // 提取【安全替换】
+    const altMatch = text.match(/【安全替换】\s*([\s\S]*?)$/);
+    if (altMatch) {
+      feedback.safe_alternative = altMatch[1].trim();
+    }
+
+    // 如果没有匹配到，尝试从JSON中解析
+    if (!feedback.risk_assessment && !feedback.risk_zone && !feedback.safe_alternative) {
+      const jsonMatch = text.match(/\{[\s\S]*?\}/);
+      if (jsonMatch) {
+        try {
+          const parsed = JSON.parse(jsonMatch[0]);
+          if (parsed.risk_test) {
+            // risk_test 格式：解析嵌套的三个模块
+            const riskTest = parsed.risk_test;
+            feedback.risk_assessment = riskMatch?.[1] || '';
+            feedback.risk_zone = zoneMatch?.[1] || '';
+            feedback.safe_alternative = altMatch?.[1] || '';
+          }
+        } catch {
+          // JSON解析失败
+        }
+      }
+    }
+
+    return feedback;
   }
 
   // 调用 Supervisor API（社交督导）
@@ -212,7 +256,7 @@ ${structuredDataText}
     chatHistory: ChatMessageItem[],
     userReply: string,
     structuredData: StructuredData
-  ): Promise<SupervisorResponse> {
+  ): Promise<SupervisorFeedback> {
     const config = getApiConfig().supervisor;
 
     // 构建对话历史字符串
@@ -239,7 +283,10 @@ ${userReply}
 【结构化数据】
 ${structuredDataText}
 
-请对职场新人的本轮回复进行评价和反馈。`;
+请对职场新人的本轮回复进行评价和反馈，按照以下格式输出：
+【风险判定】...
+【雷区定位】...
+【安全替换】...`;
 
     try {
       const response = await this.callDifyAPI(
@@ -255,26 +302,21 @@ ${structuredDataText}
       }
 
       const answer = response.answer;
+      console.log('Supervisor API 原始响应:', answer);
 
-      // 尝试提取结构化反馈
-      const jsonMatch = answer.match(/\{[\s\S]*?\}/);
-      if (jsonMatch) {
-        try {
-          const parsed = JSON.parse(jsonMatch[0]);
-          return {
-            feedback: parsed.feedback || answer,
-            score: parsed.score,
-            improvements: parsed.improvements || []
-          };
-        } catch {
-          // JSON解析失败
-        }
-      }
+      // 解析三个模块
+      const feedback = this.parseSupervisorFeedback(answer);
 
-      return { feedback: answer };
+      console.log('解析后的督导反馈:', feedback);
+
+      return feedback;
     } catch (error) {
       console.error('Supervisor API调用失败:', error);
-      return { feedback: '督导评价暂时无法获取，请稍后再试。' };
+      return {
+        risk_assessment: '暂时无法获取督导评价',
+        risk_zone: '',
+        safe_alternative: ''
+      };
     }
   }
 
