@@ -40,10 +40,10 @@ export interface SupervisorFeedback {
 
 // NPC 人设精确映射（必须与API定义完全一致）
 const NPC_PERSONA_MAP: Record<string, string> = {
-  '沉默/冷处理型': '沉默/冷处理型：微信回复"嗯/阅/好"，或者已读不回，得不到反馈',
+  '逻辑压制型': '逻辑压制型：极其抠细节，崇尚数据和逻辑，连珠炮式反问，让你觉得自己很不专业',
   '模糊否定型': '模糊否定型：只说"感觉不对，再改改"，完全不知道标准是什么',
-  '情绪施压型': '情绪施压型：总是叹气、阴阳怪气，让你产生强烈的自我怀疑和愧疚感',
-  '逻辑压制型': '逻辑压制型：极其抠细节，崇尚数据和逻辑，连珠炮式反问，让你觉得自己很不专业'
+  '沉默/冷处理型': '沉默/冷处理型：微信回复"嗯/阅/好"，或者已读不回，得不到反馈',
+  '情绪施压型': '情绪施压型：总是叹气、阴阳怪气，让你产生强烈的自我怀疑和愧疚感'
 };
 
 const getApiConfig = () => {
@@ -53,6 +53,8 @@ const getApiConfig = () => {
   const hintKey = import.meta.env.VITE_HINT_API_KEY || 'app-yQp1aS5YSKGlUEmlMpqY7rwG';
   const supervisorUrl = import.meta.env.VITE_SUPERVISOR_API_URL || 'https://api.dify.ai/v1';
   const supervisorKey = import.meta.env.VITE_SUPERVISOR_API_KEY || 'app-yQp1aS5YSKGlUEmlMpqY7rwG';
+
+  console.log('API配置:', { npcUrl, npcKey, hintUrl, hintKey, supervisorUrl, supervisorKey });
 
   return {
     npc: { url: npcUrl, key: npcKey },
@@ -90,7 +92,7 @@ export class WorkplaceApiService {
       payload: difyPayload
     };
 
-    console.log('API调用:', { apiUrl, inputs });
+    console.log('API调用参数:', { apiUrl, inputs, query: query.substring(0, 100) });
 
     for (let attempt = 0; attempt <= retries; attempt++) {
       try {
@@ -113,8 +115,10 @@ export class WorkplaceApiService {
         }
 
         const data = await response.json();
+        console.log('API响应:', data);
         return data;
       } catch (error) {
+        console.error(`API调用失败 (尝试 ${attempt + 1}/${retries + 1}):`, error);
         if (attempt === retries) {
           throw new Error(`API调用失败: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
@@ -132,10 +136,11 @@ export class WorkplaceApiService {
     // 使用精确的人设映射
     const npcPersona = NPC_PERSONA_MAP[personaTitle];
     if (!npcPersona) {
+      console.error('未知的人设类型:', personaTitle);
       throw new Error(`未知的人设类型: ${personaTitle}`);
     }
 
-    console.log('使用NPC人设:', npcPersona);
+    console.log('使用NPC人设:', personaTitle, '=>', npcPersona);
 
     const inputs = { npc_persona: npcPersona };
 
@@ -163,8 +168,6 @@ export class WorkplaceApiService {
   ): Promise<HintResponse> {
     const config = getApiConfig().hint;
 
-    console.log('调用Hint API，配置:', config);
-
     // 构建对话历史字符串
     const historyText = chatHistory.map(msg => {
       const role = msg.role === 'user' ? '职场新人' : '带教老师';
@@ -189,6 +192,8 @@ ${structuredDataText}
 
 请基于以上信息，为职场新人生成下一轮回复的提示建议。用简洁的语言给出1-2条具体的回复建议。`;
 
+    console.log('调用Hint API');
+
     try {
       const response = await this.callDifyAPI(
         config.url,
@@ -205,7 +210,6 @@ ${structuredDataText}
       const answer = response.answer;
       console.log('Hint API响应:', answer);
 
-      // 直接返回答案作为提示
       return { hint: answer };
     } catch (error) {
       console.error('Hint API调用失败:', error);
@@ -220,6 +224,8 @@ ${structuredDataText}
       risk_zone: '',
       safe_alternative: ''
     };
+
+    console.log('解析督导反馈原文:', text);
 
     // 提取【风险判定】
     const riskMatch = text.match(/【风险判定】\s*([\s\S]*?)(?=【雷区定位】|$)/);
@@ -241,14 +247,12 @@ ${structuredDataText}
 
     // 如果没有匹配到，尝试从JSON中解析
     if (!feedback.risk_assessment && !feedback.risk_zone && !feedback.safe_alternative) {
-      // 尝试从JSON risk_test 字段解析
       const jsonMatch = text.match(/\{[\s\S]*?\}/);
       if (jsonMatch) {
         try {
           const parsed = JSON.parse(jsonMatch[0]);
           if (parsed.risk_test && typeof parsed.risk_test === 'string') {
             const riskTest = parsed.risk_test;
-            // 从 risk_test 字符串中提取三个模块
             const r1 = riskTest.match(/【风险判定】([\s\S]*?)(?=【雷区定位】|$)/);
             const r2 = riskTest.match(/【雷区定位】([\s\S]*?)(?=【安全替换】|$)/);
             const r3 = riskTest.match(/【安全替换】([\s\S]*?)$/);
@@ -262,7 +266,7 @@ ${structuredDataText}
       }
     }
 
-    console.log('解析督导反馈:', feedback);
+    console.log('解析后的督导反馈:', feedback);
 
     return feedback;
   }
