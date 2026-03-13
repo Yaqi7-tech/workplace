@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { ArrowLeft, Send, Sparkles, Lightbulb, TrendingUp, AlertTriangle, Shield, Loader2 } from 'lucide-react';
+import { ArrowLeft, Send, Sparkles, Lightbulb, TrendingUp, AlertTriangle, Shield, Loader2, ChevronDown, ChevronUp, BookOpen, User } from 'lucide-react';
 import { Button } from '@/app/components/ui/button';
 import {
   SCENARIO_CARDS,
@@ -39,6 +39,7 @@ export function WorkplaceChatInterface({
   const [isLoadingHint, setIsLoadingHint] = useState(false);
   const [supervisorFeedback, setSupervisorFeedback] = useState<SupervisorFeedback | null>(null);
   const [structuredData, setStructuredData] = useState<StructuredData>({});
+  const [showBackgroundInfo, setShowBackgroundInfo] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -334,7 +335,54 @@ export function WorkplaceChatInterface({
                   </div>
                 </div>
               </div>
+
+              {/* 展开/折叠按钮 */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowBackgroundInfo(!showBackgroundInfo)}
+                className="px-2 py-1 hover:bg-[rgb(60,155,201,0.1)]"
+              >
+                {showBackgroundInfo ? (
+                  <ChevronUp className="w-4 h-4" style={{ color: THEME_COLORS.blue }} />
+                ) : (
+                  <ChevronDown className="w-4 h-4" style={{ color: THEME_COLORS.blue }} />
+                )}
+              </Button>
             </div>
+
+            {/* 背景信息详情 - 可展开/折叠 */}
+            {showBackgroundInfo && (
+              <div className="mt-4 space-y-3 pb-2">
+                {/* 具体事件 */}
+                <div className="rounded-xl p-4 border-2" style={{ backgroundColor: 'rgb(254,225,153,0.25)', borderColor: 'rgb(254,225,153,0.6)' }}>
+                  <div className="flex items-start gap-2 mb-2">
+                    <BookOpen className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: 'rgb(249,127,95)' }} />
+                    <h4 className="text-sm font-semibold" style={{ color: 'rgb(249,127,95)' }}>具体事件</h4>
+                  </div>
+                  <p className="text-sm leading-relaxed text-[rgb(45,45,45)]">{scenario.event}</p>
+                </div>
+
+                {/* 具体人设 */}
+                <div className="rounded-xl p-4 border-2" style={{ backgroundColor: 'rgb(254,254,250)', borderColor: 'rgba(60,155,201,0.2)' }}>
+                  <div className="flex items-start gap-2 mb-2">
+                    <User className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: THEME_COLORS.blue }} />
+                    <h4 className="text-sm font-semibold text-[rgb(45,45,45)]">带教老师人设</h4>
+                  </div>
+                  <div className="space-y-2 text-sm">
+                    <p className="text-[rgb(45,45,45)] leading-relaxed">
+                      <span className="font-semibold">特征：</span>{persona.characteristics}
+                    </p>
+                    <p className="text-[rgb(122,122,122)] italic text-xs leading-relaxed">
+                      {persona.catchphrase}
+                    </p>
+                    <p className="text-[rgb(249,127,95)] text-xs leading-relaxed border-l-2 pl-2" style={{ borderColor: 'rgb(249,127,95)' }}>
+                      <span className="font-semibold">行为红线：</span>{persona.behaviorRule}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
