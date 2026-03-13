@@ -17,6 +17,10 @@
   ],
   "env": {
     "VITE_NPC_API_URL": "https://api.dify.ai/v1",
-    "VITE_NPC_API_KEY": "app-R4FHtuNaBdtN9LzCgECSMUqS"
+    "VITE_NPC_API_KEY": "app-R4FHtuNaBdtN9LzCgECSMUqS",
+    "VITE_HINT_API_URL": "https://api.dify.ai/v1",
+    "VITE_HINT_API_KEY": "app-yQp1aS5YSKGlUEmlMpqY7rwG",
+    "VITE_SUPERVISOR_API_URL": "https://api.dify.ai/v1",
+    "VITE_SUPERVISOR_API_KEY": "app-yQp1aS5YSKGlUEmlMpqY7rwG"
   }
 }
