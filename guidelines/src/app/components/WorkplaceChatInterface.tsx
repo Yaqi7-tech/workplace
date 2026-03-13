@@ -196,7 +196,14 @@ export function WorkplaceChatInterface({
 
     try {
       // 调用 NPC API，获取消息和情绪数据
-      const npcResponse = await workplaceApiService.callNPC(userReply, persona.title, scenario.title);
+      // 传递当前对话历史（不包括当前这条新消息）
+      const chatHistory: ChatMessageItem[] = messages.map(m => ({
+        role: m.role,
+        content: m.content,
+        timestamp: m.timestamp
+      }));
+
+      const npcResponse = await workplaceApiService.callNPC(userReply, persona.title, scenario.title, chatHistory);
 
       const assistantMessage: Message = {
         role: 'assistant',
