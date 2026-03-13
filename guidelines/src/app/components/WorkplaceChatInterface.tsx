@@ -76,11 +76,12 @@ export function WorkplaceChatInterface({
   // 自动获取提示 - NPC回复后自动调用
   useEffect(() => {
     const lastMessage = messages[messages.length - 1];
-    if (lastMessage && lastMessage.role === 'assistant' && !isLoading) {
-      // NPC回复后自动获取提示
+    // 只在最后一条是NPC回复且之前没有获取过hint时调用
+    if (lastMessage && lastMessage.role === 'assistant' && !isLoading && !hint) {
       fetchHint();
     }
-  }, [messages]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages, isLoading]);
 
   // 获取提示
   const fetchHint = async () => {
@@ -95,6 +96,8 @@ export function WorkplaceChatInterface({
       const scenarioText = `背景情境：${scenario.background}\n具体事件：${scenario.event}`;
       const personaText = `特征：${persona.characteristics}\n${persona.catchphrase}\n${persona.behaviorRule}`;
 
+      console.log('调用Hint API，场景:', scenario.title, '人设:', persona.title);
+
       const response = await workplaceApiService.callHintAPI(
         scenarioText,
         personaText,
@@ -102,6 +105,7 @@ export function WorkplaceChatInterface({
         structuredData
       );
 
+      console.log('Hint API响应:', response);
       setHint(response.hint);
     } catch (error) {
       console.error('获取提示失败:', error);
@@ -142,19 +146,15 @@ export function WorkplaceChatInterface({
     if (!inputValue.trim() || isLoading) return;
 
     const userReply = inputValue.trim();
-    const isFirstMessage = messages.length === 0;
 
-    // 第一条消息需要包含场景和人设的上下文
-    const messageContent = isFirstMessage
-      ? `${systemPrompt}\n\n【用户开场白】\n${userReply}`
-      : userReply;
-
+    // 用户消息
     const userMessage: Message = {
       role: 'user',
-      content: isFirstMessage ? userReply : messageContent,
+      content: userReply,
       timestamp: new Date()
     };
 
+    // 清空hint和督导反馈，准备新的一轮
     setHint('');
     setSupervisorFeedback(null);
 
@@ -163,8 +163,8 @@ export function WorkplaceChatInterface({
     setIsLoading(true);
 
     try {
-      // 传递场景标题和人设标题给NPC API
-      const response = await workplaceApiService.callNPC(messageContent, persona.title, scenario.title);
+      // Dify现在通过表单字段接收场景和人设，query只需要用户的实际消息
+      const response = await workplaceApiService.callNPC(userReply, persona.title, scenario.title);
 
       const assistantMessage: Message = {
         role: 'assistant',

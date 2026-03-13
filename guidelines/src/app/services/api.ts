@@ -223,19 +223,19 @@ ${structuredDataText}`;
     // 提取【风险判定】
     const riskMatch = text.match(/【风险判定】\s*([\s\S]*?)(?=【雷区定位】|$)/);
     if (riskMatch) {
-      feedback.risk_assessment = riskMatch[1].trim();
+      feedback.risk_assessment = riskMatch[1].trim().replace(/\n+$/g, '');
     }
 
     // 提取【雷区定位】
     const zoneMatch = text.match(/【雷区定位】\s*([\s\S]*?)(?=【安全替换】|$)/);
     if (zoneMatch) {
-      feedback.risk_zone = zoneMatch[1].trim();
+      feedback.risk_zone = zoneMatch[1].trim().replace(/\n+$/g, '');
     }
 
     // 提取【安全替换】
     const altMatch = text.match(/【安全替换】\s*([\s\S]*?)$/);
     if (altMatch) {
-      feedback.safe_alternative = altMatch[1].trim();
+      feedback.safe_alternative = altMatch[1].trim().replace(/\n+$/g, '');
     }
 
     // 如果没有匹配到，尝试从JSON中解析
