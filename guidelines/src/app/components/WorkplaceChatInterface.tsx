@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { ArrowLeft, Send, Sparkles, Lightbulb, TrendingUp, AlertTriangle, Shield, Loader2, ChevronDown, ChevronUp, BookOpen, User } from 'lucide-react';
+import { ArrowLeft, Send, Sparkles, Lightbulb, TrendingUp, AlertTriangle, Shield, Loader2, BookOpen, User } from 'lucide-react';
 import { Button } from '@/app/components/ui/button';
 import {
   SCENARIO_CARDS,
@@ -39,7 +39,6 @@ export function WorkplaceChatInterface({
   const [isLoadingHint, setIsLoadingHint] = useState(false);
   const [supervisorFeedback, setSupervisorFeedback] = useState<SupervisorFeedback | null>(null);
   const [structuredData, setStructuredData] = useState<StructuredData>({});
-  const [showBackgroundInfo, setShowBackgroundInfo] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -310,74 +309,46 @@ export function WorkplaceChatInterface({
 
   return (
     <div className="h-screen flex" style={{ backgroundColor: 'rgb(254,254,250)' }}>
-      {/* 左侧主区域 - 分为场景卡片和聊天区域 */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* 场景和人设卡片 - 在对话过程中持续展示 */}
-        <div className="bg-white border-b-2 shrink-0" style={{ borderColor: 'rgba(60,155,201,0.15)' }}>
-          <div className="max-w-4xl mx-auto px-4 py-3">
-            <div className="flex items-center gap-4">
-              {/* 场景卡片 */}
-              <div className="flex-1 rounded-xl overflow-hidden border-2" style={{ borderColor: scenario.color + '40', backgroundColor: scenario.color + '15' }}>
-                <div className="px-3 py-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">{scenario.icon}</span>
-                    <span className="text-sm font-semibold text-[rgb(45,45,45)]">{scenario.title}</span>
-                  </div>
-                </div>
-              </div>
+      {/* 左侧边栏 - 背景信息 */}
+      <div className="w-80 border-r-2 flex flex-col bg-white shrink-0 overflow-y-auto" style={{ borderColor: 'rgba(60,155,201,0.15)' }}>
+        {/* 顶部标题 */}
+        <div className="px-4 py-3 border-b-2 shrink-0" style={{ borderColor: 'rgba(60,155,201,0.1)' }}>
+          <h3 className="font-semibold text-sm text-[rgb(45,45,45)]">背景信息</h3>
+        </div>
 
-              {/* 人设卡片 */}
-              <div className="flex-1 rounded-xl overflow-hidden border-2" style={{ borderColor: persona.color + '40', backgroundColor: persona.color + '15' }}>
-                <div className="px-3 py-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">{persona.icon}</span>
-                    <span className="text-sm font-semibold text-[rgb(45,45,45)]">{persona.title}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* 展开/折叠按钮 */}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowBackgroundInfo(!showBackgroundInfo)}
-                className="px-2 py-1 hover:bg-[rgb(60,155,201,0.1)]"
-              >
-                {showBackgroundInfo ? (
-                  <ChevronUp className="w-4 h-4" style={{ color: THEME_COLORS.blue }} />
-                ) : (
-                  <ChevronDown className="w-4 h-4" style={{ color: THEME_COLORS.blue }} />
-                )}
-              </Button>
+        {/* 场景信息 */}
+        <div className="p-4 border-b-2" style={{ borderColor: 'rgba(60,155,201,0.1)' }}>
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-xl">{scenario.icon}</span>
+            <h4 className="font-semibold text-sm text-[rgb(45,45,45)]">{scenario.title}</h4>
+          </div>
+          <div className="rounded-lg p-3 border" style={{ backgroundColor: 'rgb(254,225,153,0.25)', borderColor: 'rgb(254,225,153,0.5)' }}>
+            <div className="flex items-center gap-1 mb-2">
+              <BookOpen className="w-3 h-3" style={{ color: 'rgb(249,127,95)' }} />
+              <span className="text-xs font-semibold" style={{ color: 'rgb(249,127,95)' }}>具体事件</span>
             </div>
-
-            {/* 背景信息详情 - 可展开/折叠 */}
-            {showBackgroundInfo && (
-              <div className="mt-4 space-y-3 pb-2">
-                {/* 具体事件 */}
-                <div className="rounded-xl p-4 border-2" style={{ backgroundColor: 'rgb(254,225,153,0.25)', borderColor: 'rgb(254,225,153,0.6)' }}>
-                  <div className="flex items-start gap-2 mb-2">
-                    <BookOpen className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: 'rgb(249,127,95)' }} />
-                    <h4 className="text-sm font-semibold" style={{ color: 'rgb(249,127,95)' }}>具体事件</h4>
-                  </div>
-                  <p className="text-sm leading-relaxed text-[rgb(45,45,45)]">{scenario.event}</p>
-                </div>
-
-                {/* 具体人设 */}
-                <div className="rounded-xl p-4 border-2" style={{ backgroundColor: 'rgb(254,254,250)', borderColor: 'rgba(60,155,201,0.2)' }}>
-                  <div className="flex items-start gap-2 mb-2">
-                    <User className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: THEME_COLORS.blue }} />
-                    <h4 className="text-sm font-semibold text-[rgb(45,45,45)]">带教老师人设</h4>
-                  </div>
-                  <p className="text-sm text-[rgb(45,45,45)] leading-relaxed">
-                    {persona.characteristics}
-                  </p>
-                </div>
-              </div>
-            )}
+            <p className="text-xs leading-relaxed text-[rgb(45,45,45)]">{scenario.event}</p>
           </div>
         </div>
 
+        {/* 人设信息 */}
+        <div className="p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-xl">{persona.icon}</span>
+            <h4 className="font-semibold text-sm text-[rgb(45,45,45)]">{persona.title}</h4>
+          </div>
+          <div className="rounded-lg p-3 border" style={{ backgroundColor: 'rgb(254,254,250)', borderColor: 'rgba(60,155,201,0.2)' }}>
+            <div className="flex items-center gap-1 mb-2">
+              <User className="w-3 h-3" style={{ color: THEME_COLORS.blue }} />
+              <span className="text-xs font-semibold text-[rgb(45,45,45)]">带教老师人设</span>
+            </div>
+            <p className="text-xs leading-relaxed text-[rgb(45,45,45)]">{persona.characteristics}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* 中间聊天区域 */}
+      <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
         <div className="bg-white border-b-2 shrink-0" style={{ borderColor: 'rgba(60,155,201,0.15)' }}>
           <div className="max-w-4xl mx-auto px-6 py-3 flex items-center justify-between">
@@ -400,6 +371,7 @@ export function WorkplaceChatInterface({
               结束训练
             </Button>
           </div>
+        </div>
         </div>
 
         {/* Messages */}
