@@ -38,24 +38,6 @@ export interface SupervisorFeedback {
   safe_alternative: string;
 }
 
-// NPC 人设精确映射（必须与API定义完全一致）
-const NPC_PERSONA_MAP: Record<string, string> = {
-  '沉默/冷处理型': '沉默/冷处理型：微信回复"嗯/阅/好"，或者已读不回，得不到反馈',
-  '模糊否定型': '模糊否定型：只说"感觉不对，再改改"，完全不知道标准是什么',
-  '情绪施压型': '情绪施压型：总是叹气、阴阳怪气，让你产生强烈的自我怀疑和愧疚感',
-  '逻辑压制型': '逻辑压制型：极其抠细节，连珠炮式反问，让你觉得自己很不专业'
-};
-
-// 场景精确映射（必须与API定义完全一致）
-const SCENARIO_MAP: Record<string, string> = {
-  '接受模糊指令': '接受模糊指令：领导只说"你去看着办"，不敢细问要求，怕显得自己能力差',
-  '工作失误汇报': '工作失误汇报：搞砸了任务（如发错邮件、数据出错），不知道如何第一时间止损和道歉',
-  '拒绝不合理要求': '拒绝不合理要求：领导/前辈在非工作时间安排非紧急任务，想拒绝又怕得罪人',
-  '进度滞后预警': '进度滞后预警：任务完不成了，不敢提前说，直到Deadline才坦白',
-  '争取权益': '争取权益：想要申请转正、加薪或询问加班费，但觉得难以启齿',
-  '职场闲聊': '职场闲聊：在电梯/食堂偶遇大领导，完全不知道该聊什么'
-};
-
 const getApiConfig = () => {
   const npcUrl = import.meta.env.VITE_NPC_API_URL || 'https://api.dify.ai/v1';
   const npcKey = import.meta.env.VITE_NPC_API_KEY || 'app-R4FHtuNaBdtN9LzCgECSMUqS';
@@ -143,26 +125,16 @@ export class WorkplaceApiService {
   async callNPC(message: string, personaTitle: string, scenarioTitle?: string): Promise<string> {
     const config = getApiConfig().npc;
 
-    // 使用精确的人设映射
-    const npcPersona = NPC_PERSONA_MAP[personaTitle];
-    if (!npcPersona) {
-      console.error('未知的人设类型:', personaTitle);
-      throw new Error(`未知的人设类型: ${personaTitle}`);
+    console.log('使用NPC人设:', personaTitle);
+    if (scenarioTitle) {
+      console.log('使用场景:', scenarioTitle);
     }
 
-    console.log('使用NPC人设:', personaTitle, '=>', npcPersona);
-
-    // 构建inputs - 包含人设和场景
-    const inputs: Record<string, any> = { npc_persona: npcPersona };
+    // 构建inputs - Dify已简化为只接受简短key
+    const inputs: Record<string, any> = { npc_persona: personaTitle };
 
     if (scenarioTitle) {
-      const scenario = SCENARIO_MAP[scenarioTitle];
-      if (!scenario) {
-        console.error('未知的场景类型:', scenarioTitle);
-        throw new Error(`未知的场景类型: ${scenarioTitle}`);
-      }
-      inputs.scenario = scenario;
-      console.log('使用场景:', scenarioTitle, '=>', scenario);
+      inputs.scenario = scenarioTitle;
     }
 
     console.log('发送给NPC API的inputs:', JSON.stringify(inputs, null, 2));
