@@ -213,7 +213,6 @@ export class WorkplaceApiService {
       emotionData: Object.keys(emotionData).length > 0 ? emotionData : undefined
     };
   }
-  }
 
   // 调用 Hint API（生成提示）
   async callHintAPI(
