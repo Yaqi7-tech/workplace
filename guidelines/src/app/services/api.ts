@@ -149,13 +149,19 @@ export class WorkplaceApiService {
       console.log('使用场景:', scenarioTitle);
     }
 
-    // 构建inputs - Dify已简化为只接受简短key
-    const inputs: Record<string, any> = {
-      npc_persona: personaTitle,
-    };
+    // 只在第一次创建会话时传入人设和场景参数
+    // 后续调用通过 conversation_id 继续对话，不需要再传这些参数
+    const inputs: Record<string, any> = {};
 
-    if (scenarioTitle) {
-      inputs.scenario = scenarioTitle;
+    if (!this.conversationId) {
+      // 第一次调用：需要选择人设和场景
+      inputs.npc_persona = personaTitle;
+      if (scenarioTitle) {
+        inputs.scenario = scenarioTitle;
+      }
+      console.log('首次调用，发送人设和场景参数');
+    } else {
+      console.log('继续对话，使用已有会话');
     }
 
     console.log('发送给NPC API的inputs:', JSON.stringify(inputs, null, 2));

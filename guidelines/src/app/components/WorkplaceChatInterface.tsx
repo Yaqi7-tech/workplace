@@ -259,11 +259,135 @@ export function WorkplaceChatInterface({
     }
   };
 
-  // 使用提示（使用示例回复）
-  const useHint = (exampleText?: string) => {
+  // 使用提示（使用示例回复）- 替换用户最后一条消息并重新生成
+  const useHint = async (exampleText?: string) => {
     const textToUse = exampleText || hintData?.example_reply || '';
-    if (textToUse) {
+    if (!textToUse) return;
+
+    // 找到用户最后一条消息的索引
+    let lastUserMessageIndex = -1;
+    for (let i = messages.length - 1; i >= 0; i--) {
+      if (messages[i].role === 'user') {
+        lastUserMessageIndex = i;
+        break;
+      }
+    }
+
+    if (lastUserMessageIndex === -1) {
+      // 如果没有用户消息，回退到原行为：放入输入框
       setInputValue(textToUse);
+      inputRef.current?.focus();
+      return;
+    }
+
+    setIsLoading(true);
+
+    // 清空hintData和督导反馈
+    setHintData(null);
+    setSupervisorFeedback(null);
+
+    try {
+      // 替换用户最后一条消息的内容
+      setMessages(prev => {
+        const newMessages = [...prev];
+        newMessages[lastUserMessageIndex] = {
+          ...newMessages[lastUserMessageIndex],
+          content: textToUse,
+          timestamp: new Date()
+        };
+        return newMessages;
+      });
+
+      // 调用 NPC API 重新生成回复
+      const npcResponse = await workplaceApiService.callNPC(textToUse, persona.title, scenario.title);
+
+      // 过滤掉 NPC 回复中的状态变量数据（JSON 格式）
+      const cleanMessage = npcResponse.message.replace(/\{[\s\S]*?session_emotion_timeline[\s\S]*?\}/g, '').trim();
+
+      const assistantMessage: Message = {
+        role: 'assistant',
+        content: cleanMessage,
+        timestamp: new Date()
+      };
+
+      // 替换NPC的回复（删除旧的，添加新的）
+      setMessages(prev => {
+        // 找到最后一条用户消息的索引
+        let lastUserIndex = -1;
+        for (let i = prev.length - 1; i >= 0; i--) {
+          if (prev[i].role === 'user') {
+            lastUserIndex = i;
+            break;
+          }
+        }
+
+        const hasOldAssistant = lastUserIndex < prev.length - 1 && prev[lastUserIndex + 1]?.role === 'assistant';
+
+        if (hasOldAssistant) {
+          // 替换原有的assistant消息
+          const newMessages = [...prev];
+          newMessages[lastUserIndex + 1] = assistantMessage;
+          return newMessages;
+        } else {
+          // 添加新的assistant消息
+          return [...prev, assistantMessage];
+        }
+      });
+
+      // 更新情绪数据（移除最后一轮，添加新的）
+      if (npcResponse.emotionData) {
+        setStructuredData(prev => {
+          const mergedData: StructuredData = {};
+
+          // 移除最后一个数据点，添加新的
+          const timelineWithoutLast = (prev.session_emotion_timeline || []).slice(0, -1);
+          const stressWithoutLast = (prev.stress_curve || []).slice(0, -1);
+          const emotionWithoutLast = (prev.emotion_curve || []).slice(0, -1);
+
+          if (npcResponse.emotionData.session_emotion_timeline) {
+            mergedData.session_emotion_timeline = [
+              ...timelineWithoutLast,
+              ...npcResponse.emotionData.session_emotion_timeline
+            ];
+          }
+          if (npcResponse.emotionData.stress_curve) {
+            mergedData.stress_curve = [
+              ...stressWithoutLast,
+              ...npcResponse.emotionData.stress_curve
+            ];
+          }
+          if (npcResponse.emotionData.emotion_curve) {
+            mergedData.emotion_curve = [
+              ...emotionWithoutLast,
+              ...npcResponse.emotionData.emotion_curve
+            ];
+          }
+
+          return mergedData;
+        });
+      } else {
+        // 如果 NPC 没有返回情绪数据，使用模拟数据
+        setStructuredData(prev => generateStructuredData({
+          session_emotion_timeline: (prev.session_emotion_timeline || []).slice(0, -1),
+          stress_curve: (prev.stress_curve || []).slice(0, -1),
+          emotion_curve: (prev.emotion_curve || []).slice(0, -1)
+        }));
+      }
+
+      // 重新获取督导反馈
+      await fetchSupervisorFeedback(textToUse);
+
+    } catch (error) {
+      console.error('重新生成失败:', error);
+      // 如果失败，显示错误消息
+      const errorMessage: Message = {
+        role: 'assistant',
+        content: '抱歉，重新生成失败，请稍后再试。',
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsLoading(false);
       inputRef.current?.focus();
     }
   };
