@@ -159,15 +159,16 @@ export class WorkplaceApiService {
     // 后续调用通过 conversation_id 继续对话，不需要再传这些参数
     const inputs: Record<string, any> = {};
 
+    // 每次调用都传入人设和场景参数（Dify工作流需要这些参数）
+    inputs.npc_persona = personaTitle;
+    if (scenarioTitle) {
+      inputs.scenario = scenarioTitle;
+    }
+
     if (!this.conversationId) {
-      // 第一次调用：需要选择人设和场景
-      inputs.npc_persona = personaTitle;
-      if (scenarioTitle) {
-        inputs.scenario = scenarioTitle;
-      }
       console.log('首次调用，发送人设和场景参数');
     } else {
-      console.log('继续对话，使用已有会话');
+      console.log('继续对话，仍发送人设和场景参数');
     }
 
     console.log('发送给NPC API的inputs:', JSON.stringify(inputs, null, 2));
