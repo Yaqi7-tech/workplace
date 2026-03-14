@@ -191,6 +191,34 @@ export class WorkplaceApiService {
     // 提取情绪数据（如果存在）
     const emotionData: StructuredData = {};
 
+    // Dify把情绪数据放在answer文本中，需要解析出来
+    // 尝试从answer中提取JSON格式的情绪数据
+    const emotionDataMatch = response.answer.match(/\{[\s\S]*?"session_emotion_timeline"[\s\S]*?"stress_curve"[\s\S]*?"emotion_curve"[\s\S]*?\n?\}/);
+    if (emotionDataMatch) {
+      try {
+        // 清理JSON字符串（移除可能的Unicode转义）
+        let jsonString = emotionDataMatch[0];
+        // 替换Unicode转义序列
+        jsonString = jsonString.replace(/\\u([0-9a-fA-F]{4})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
+        const parsedEmotionData = JSON.parse(jsonString);
+
+        if (parsedEmotionData.session_emotion_timeline) {
+          emotionData.session_emotion_timeline = parsedEmotionData.session_emotion_timeline;
+        }
+        if (parsedEmotionData.stress_curve) {
+          emotionData.stress_curve = parsedEmotionData.stress_curve;
+        }
+        if (parsedEmotionData.emotion_curve) {
+          emotionData.emotion_curve = parsedEmotionData.emotion_curve;
+        }
+
+        console.log('从answer中解析出的情绪数据:', emotionData);
+      } catch (e) {
+        console.warn('解析answer中的情绪数据失败:', e);
+      }
+    }
+
+    // 同时检查响应中的独立字段（如果有）
     if (response.session_emotion_timeline) {
       emotionData.session_emotion_timeline = response.session_emotion_timeline;
     }
