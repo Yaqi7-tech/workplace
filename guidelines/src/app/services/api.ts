@@ -345,6 +345,27 @@ ${structuredDataText}`;
       const answer = response.answer;
       console.log('Hint API响应:', answer);
 
+      // 尝试解析嵌套的JSON格式
+      try {
+        const parsed = JSON.parse(answer);
+        if (parsed.hint) {
+          // hint字段是一个字符串化的JSON，需要再次解析
+          let hintContent = parsed.hint;
+          // 替换Unicode转义序列
+          hintContent = hintContent.replace(/\\u([0-9a-fA-F]{4})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
+          // 替换转义的换行符
+          hintContent = hintContent.replace(/\\n/g, '\n');
+          // 替换转义的引号
+          hintContent = hintContent.replace(/\\"/g, '"');
+
+          const hintData = JSON.parse(hintContent);
+          console.log('解析后的HintData:', hintData);
+          return { hintData };
+        }
+      } catch (e) {
+        console.log('解析Hint JSON失败，使用原始文本:', e);
+      }
+
       return { hint: answer };
     } catch (error) {
       console.error('Hint API调用失败:', error);
