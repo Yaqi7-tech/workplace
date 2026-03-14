@@ -161,11 +161,12 @@ export class WorkplaceApiService {
 
     if (!this.conversationId) {
       // 第一次调用：需要选择人设和场景
-      inputs.npc_persona = personaTitle;
-      if (scenarioTitle) {
-        inputs.scenario = scenarioTitle;
-      }
-      console.log('首次调用，发送人设和场景参数');
+      // 暂时不传参数测试
+      // inputs.npc_persona = personaTitle;
+      // if (scenarioTitle) {
+      //   inputs.scenario = scenarioTitle;
+      // }
+      console.log('首次调用，不传人设和场景参数（测试）');
     } else {
       console.log('继续对话，使用已有会话');
     }
