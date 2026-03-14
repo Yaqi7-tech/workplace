@@ -193,8 +193,8 @@ export class WorkplaceApiService {
 
     // Dify把情绪数据放在answer文本中，需要解析出来
     // 尝试从answer中提取JSON格式的情绪数据
-    // 使用更宽松的正则表达式来匹配包含嵌套大括号的JSON
-    const emotionDataMatch = response.answer.match(/\{\s*"session_emotion_timeline"[\s\S]*?"stress_curve"[\s\S]*?"emotion_curve"[\s\S]*?\n?\}/);
+    // 使用更精确的正则表达式来匹配完整的JSON对象
+    const emotionDataMatch = response.answer.match(/\{\s*"session_emotion_timeline"\s*:\s*\[[\s\S]*?\]\s*,\s*"stress_curve"\s*:\s*\[[\s\S]*?\]\s*,\s*"emotion_curve"\s*:\s*\[[\s\S]*?\]\s*\}/);
     if (emotionDataMatch) {
       try {
         let jsonString = emotionDataMatch[0];
