@@ -223,8 +223,38 @@ export class WorkplaceApiService {
       });
     }
 
+    // 清理NPC返回的消息，移除JSON数据和场景描述
+    let cleanAnswer = response.answer;
+
+    // 移除各种格式的JSON数据块
+    // 1. 移除完整的JSON对象（包括session_emotion_timeline等）
+    cleanAnswer = cleanAnswer.replace(/\{[\s\S]*?"session_emotion_timeline[\s\S]*?\}/g, '');
+    // 2. 移除不完整的JSON片段（如 ], "stress_curve"...）
+    cleanAnswer = cleanAnswer.replace(/\],\s*"[a-z_]+":\s*\[[\s\S]*?\}/g, '');
+    // 3. 移除单独的JSON数组
+    cleanAnswer = cleanAnswer.replace(/\[[\s\S]*?"turn":[\s\S]*?\}/g, '');
+    // 4. 移除残留的JSON标记
+    cleanAnswer = cleanAnswer.replace(/\],\s*\}/g, '');
+    cleanAnswer = cleanAnswer.replace(/\{\s*/g, '');
+
+    // 移除场景描述和人设描述（以特定关键词开头的内容）
+    const removePatterns = [
+      /特征：[\s\S]*?(?=$)|特征：[\s\S]*?(?=背景情境：)/,
+      /背景情境：[\s\S]*?(?=$)|背景情境：[\s\S]*?(?=具体事件：)/,
+      /具体事件：[\s\S]*?(?=$)|具体事件：[\s\S]*?(?=口头禅：)/,
+      /口头禅：[\s\S]*?(?=$)|口头禅：[\s\S]*?(?=行为红线：)/,
+      /行为红线：[\s\S]*?(?=$)|行为红线：[\s\S]*?(?=\n\n)/
+    ];
+
+    removePatterns.forEach(pattern => {
+      cleanAnswer = cleanAnswer.replace(pattern, '');
+    });
+
+    // 清理多余的空行
+    cleanAnswer = cleanAnswer.replace(/\n{3,}/g, '\n\n').trim();
+
     return {
-      message: response.answer,
+      message: cleanAnswer,
       emotionData: Object.keys(emotionData).length > 0 ? emotionData : undefined
     };
   }
