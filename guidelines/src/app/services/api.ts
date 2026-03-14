@@ -349,18 +349,26 @@ ${structuredDataText}`;
       try {
         const parsed = JSON.parse(answer);
         if (parsed.hint) {
-          // hint字段是一个字符串化的JSON，需要再次解析
+          // 第一层解析：{hint: "{...}"}
           let hintContent = parsed.hint;
           // 替换Unicode转义序列
           hintContent = hintContent.replace(/\\u([0-9a-fA-F]{4})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
-          // 替换转义的换行符
-          hintContent = hintContent.replace(/\\n/g, '\n');
-          // 替换转义的引号
-          hintContent = hintContent.replace(/\\"/g, '"');
+          // 替换转义的换行符和引号
+          hintContent = hintContent.replace(/\\n/g, '\n').replace(/\\"/g, '"');
 
-          const hintData = JSON.parse(hintContent);
-          console.log('解析后的HintData:', hintData);
-          return { hintData };
+          // 第二次解析：{hint: "{actual_data}"}
+          const innerParsed = JSON.parse(hintContent);
+          if (innerParsed.hint) {
+            // 内层的hint字段包含实际数据
+            let actualHintContent = innerParsed.hint;
+            // 再次替换转义字符
+            actualHintContent = actualHintContent.replace(/\\u([0-9a-fA-F]{4})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
+            actualHintContent = actualHintContent.replace(/\\n/g, '\n').replace(/\\"/g, '"');
+
+            const hintData = JSON.parse(actualHintContent);
+            console.log('解析后的HintData:', hintData);
+            return { hintData };
+          }
         }
       } catch (e) {
         console.log('解析Hint JSON失败，使用原始文本:', e);
