@@ -347,27 +347,47 @@ ${structuredDataText}`;
 
       // 尝试解析嵌套的JSON格式
       try {
-        const parsed = JSON.parse(answer);
-        if (parsed.hint) {
-          // 第一层解析：{hint: "{...}"}
-          let hintContent = parsed.hint;
-          // 替换Unicode转义序列
-          hintContent = hintContent.replace(/\\u([0-9a-fA-F]{4})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
-          // 替换转义的换行符和引号
-          hintContent = hintContent.replace(/\\n/g, '\n').replace(/\\"/g, '"');
+        // 第一层：解析最外层的JSON
+        const firstLevel = JSON.parse(answer);
+        console.log('第一层解析结果:', firstLevel);
 
-          // 第二次解析：{hint: "{actual_data}"}
-          const innerParsed = JSON.parse(hintContent);
-          if (innerParsed.hint) {
-            // 内层的hint字段包含实际数据
-            let actualHintContent = innerParsed.hint;
-            // 再次替换转义字符
-            actualHintContent = actualHintContent.replace(/\\u([0-9a-fA-F]{4})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
-            actualHintContent = actualHintContent.replace(/\\n/g, '\n').replace(/\\"/g, '"');
+        let innerContent: string;
+        if (firstLevel.hint) {
+          innerContent = firstLevel.hint;
+        } else if (typeof firstLevel === 'string') {
+          innerContent = firstLevel;
+        } else {
+          throw new Error('未找到hint字段');
+        }
 
-            const hintData = JSON.parse(actualHintContent);
-            console.log('解析后的HintData:', hintData);
-            return { hintData };
+        // 检查是否是嵌套的JSON字符串（可能是 {"hint": "{...}"} 的格式）
+        if (typeof innerContent === 'string' && innerContent.trim().startsWith('{')) {
+          try {
+            // 第二层：解析hint字段的内容
+            const secondLevel = JSON.parse(innerContent);
+            console.log('第二层解析结果:', secondLevel);
+
+            // 检查是否还有更深层的嵌套（可能是 {"hint": "{...}"} 里面又有一个hint字段）
+            if (secondLevel.hint && typeof secondLevel.hint === 'string') {
+              try {
+                const thirdLevel = JSON.parse(secondLevel.hint);
+                console.log('第三层解析结果:', thirdLevel);
+
+                // 验证是否包含必要的字段
+                if (thirdLevel.diagnosis || thirdLevel.theory_base || thirdLevel.guidance) {
+                  return { hint: '', hintData: thirdLevel };
+                }
+              } catch (e) {
+                console.log('第三层解析失败，使用第二层数据:', e);
+              }
+            }
+
+            // 使用第二层的数据
+            if (secondLevel.diagnosis || secondLevel.theory_base || secondLevel.guidance) {
+              return { hint: '', hintData: secondLevel };
+            }
+          } catch (e) {
+            console.log('第二层JSON解析失败，内容可能是纯文本:', e);
           }
         }
       } catch (e) {
