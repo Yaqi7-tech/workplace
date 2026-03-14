@@ -160,9 +160,10 @@ export class WorkplaceApiService {
 
     if (!this.conversationId) {
       // 第一次调用：需要选择人设和场景
-      inputs.npc_persona = personaTitle;
+      // Dify下拉选择如果是多选类型，需要传数组格式
+      inputs.npc_persona = [personaTitle];
       if (scenarioTitle) {
-        inputs.scenario = scenarioTitle;
+        inputs.scenario = [scenarioTitle];
       }
       console.log('首次调用，发送人设和场景参数');
     } else {
