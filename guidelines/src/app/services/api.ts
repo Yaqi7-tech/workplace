@@ -262,33 +262,51 @@ export class WorkplaceApiService {
     // 清理NPC返回的消息，移除JSON数据和场景描述
     let cleanAnswer = response.answer;
 
-    // 移除场景描述和人设描述（以特定关键词开头的内容）
-    const removePatterns = [
-      /特征：[\s\S]*?(?=背景情境：|具体事件：|$)/g,
-      /背景情境：[\s\S]*?(?=具体事件：|口头禅：|特征：|$)/g,
-      /具体事件：[\s\S]*?(?=口头禅：|行为红线：|特征：|$)/g,
-      /口头禅：[\s\S]*?(?=行为红线：|特征：|背景情境：|$)/g,
-      /行为红线：[\s\S]*?(?=特征：|背景情境：|具体事件：|$)/g
+    // 调试：记录原始回答
+    console.log('NPC原始回答长度:', cleanAnswer.length);
+    console.log('NPC原始回答（前500字符）:', cleanAnswer.substring(0, 500));
+
+    // 步骤1：提取并移除所有结构化数据（JSON格式）
+    // 匹配完整的JSON对象，包含 session_emotion_timeline、stress_curve 或 emotion_curve
+    const jsonPattern = /\{\s*"session_emotion_timeline"\s*:\s*\[[\s\S]*?\]\s*,\s*"stress_curve"\s*:\s*\[[\s\S]*?\]\s*(?:,\s*"emotion_curve"\s*:\s*\[[\s\S]*?\])?\s*\}/g;
+    cleanAnswer = cleanAnswer.replace(jsonPattern, '');
+
+    // 步骤2：移除人设描述块（从"特征："到"具体事件："结束的整个块）
+    const personaPatterns = [
+      // 移除整个特征描述块（从特征开始到具体事件结束）
+      /特征[：:][\s\S]*?具体事件[：:][\s\S]*?(?=\n\n|\n?$|$)/g,
+      // 移除剩余的单独特征行
+      /特征[：:][^\n]*(?:\n[^\n]*)*/g,
+      // 移除背景情境
+      /背景情境[：:][^\n]*(?:\n[^\n]*)*/g,
+      // 移除具体事件（单独的）
+      /具体事件[：:][^\n]*(?:\n[^\n]*)*/g,
+      // 移除口头禅
+      /口头禅[：:][^\n]*(?:\n[^\n]*)*/g,
+      // 移除行为红线
+      /行为红线[：:][^\n]*(?:\n[^\n]*)*/g
     ];
 
-    removePatterns.forEach(pattern => {
+    personaPatterns.forEach(pattern => {
       cleanAnswer = cleanAnswer.replace(pattern, '');
     });
 
-    // 移除JSON数据块（包括各种格式）
-    // 1. 移除完整的JSON对象（包括session_emotion_timeline等）
-    cleanAnswer = cleanAnswer.replace(/\{[\s\S]*?(session_emotion_timeline|stress_curve|emotion_curve)[\s\S]*?\n?\}/g, '');
-    // 2. 移除不完整的JSON片段和残留符号
-    cleanAnswer = cleanAnswer.replace(/\],\s*"[a-z_]+":\s*\[[\s\S]*?\}/g, '');
-    cleanAnswer = cleanAnswer.replace(/\[[\s\S]*?"turn":\s*\d+[\s\S]*?\}/g, '');
-    cleanAnswer = cleanAnswer.replace(/\],\s*\}/g, '');
-    cleanAnswer = cleanAnswer.replace(/\{\s*/g, '');
-    cleanAnswer = cleanAnswer.replace(/\}\s*/g, '');
-    cleanAnswer = cleanAnswer.replace(/\]\s*/g, '');
-    cleanAnswer = cleanAnswer.replace(/"\s*/g, '');
+    // 步骤3：清理JSON残留（转义的数组片段）
+    cleanAnswer = cleanAnswer.replace(/\[\s*{[\s\S]*?"turn"\s*:\s*\d+[\s\S]*?\}\s*\]/g, '');
+    cleanAnswer = cleanAnswer.replace(/,\s*{\s*"label"\s*:\s*"[^"]*"\s*,\s*"turn"\s*:\s*\d+\s*}/g, '');
 
-    // 清理多余的空行
+    // 步骤4：清理孤立的标点和符号
+    cleanAnswer = cleanAnswer.replace(/^[,\s]*[,\s]\s*/gm, ''); // 行首的逗号和空格
+    cleanAnswer = cleanAnswer.replace(/\s*[,\s]\s*$/gm, ''); // 行尾的逗号和空格
+    cleanAnswer = cleanAnswer.replace(/,\s*,/g, ','); // 连续的逗号
+    cleanAnswer = cleanAnswer.replace(/^\s*,\s*/gm, ''); // 行首逗号
+
+    // 步骤5：清理多余的空行
     cleanAnswer = cleanAnswer.replace(/\n{3,}/g, '\n\n').trim();
+
+    // 调试：记录清理后的回答
+    console.log('NPC清理后回答长度:', cleanAnswer.length);
+    console.log('NPC清理后回答:', cleanAnswer);
 
     return {
       message: cleanAnswer,
