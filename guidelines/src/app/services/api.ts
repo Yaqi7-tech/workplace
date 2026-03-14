@@ -359,19 +359,19 @@ ${structuredDataText}`;
     // 提取【风险判定】
     const riskMatch = text.match(/【风险判定】\s*([\s\S]*?)(?=【雷区定位】|$)/);
     if (riskMatch) {
-      feedback.risk_assessment = riskMatch[1].trim().replace(/\n+$/g, '');
+      feedback.risk_assessment = cleanSupervisorText(riskMatch[1]);
     }
 
     // 提取【雷区定位】
     const zoneMatch = text.match(/【雷区定位】\s*([\s\S]*?)(?=【安全替换】|$)/);
     if (zoneMatch) {
-      feedback.risk_zone = zoneMatch[1].trim().replace(/\n+$/g, '');
+      feedback.risk_zone = cleanSupervisorText(zoneMatch[1]);
     }
 
     // 提取【安全替换】
     const altMatch = text.match(/【安全替换】\s*([\s\S]*?)$/);
     if (altMatch) {
-      feedback.safe_alternative = altMatch[1].trim().replace(/\n+$/g, '');
+      feedback.safe_alternative = cleanSupervisorText(altMatch[1]);
     }
 
     // 如果没有匹配到，尝试从JSON中解析
@@ -385,9 +385,9 @@ ${structuredDataText}`;
             const r1 = riskTest.match(/【风险判定】([\s\S]*?)(?=【雷区定位】|$)/);
             const r2 = riskTest.match(/【雷区定位】([\s\S]*?)(?=【安全替换】|$)/);
             const r3 = riskTest.match(/【安全替换】([\s\S]*?)$/);
-            if (r1) feedback.risk_assessment = r1[1].trim();
-            if (r2) feedback.risk_zone = r2[1].trim();
-            if (r3) feedback.safe_alternative = r3[1].trim();
+            if (r1) feedback.risk_assessment = cleanSupervisorText(r1[1]);
+            if (r2) feedback.risk_zone = cleanSupervisorText(r2[1]);
+            if (r3) feedback.safe_alternative = cleanSupervisorText(r3[1]);
           }
         } catch {
           // JSON解析失败
@@ -480,6 +480,16 @@ ${structuredDataText}
   getConversationId(): string | null {
     return this.conversationId;
   }
+}
+
+// 清理督导反馈文本的辅助函数
+function cleanSupervisorText(text: string): string {
+  return text
+    .trim()
+    .replace(/\n+$/g, '')           // 移除末尾的换行
+    .replace(/["'}\]]+$/g, '')      // 移除末尾的引号、大括号、中括号
+    .replace(/^[{"'\[]+/, '')       // 移除开头的引号、大括号、中括号
+    .trim();
 }
 
 export const workplaceApiService = new WorkplaceApiService();
