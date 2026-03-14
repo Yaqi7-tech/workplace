@@ -88,13 +88,18 @@ export class WorkplaceApiService {
     retries = 2,
     timeoutMs = 120000
   ): Promise<DifyResponse> {
+    // 构建payload，只在有conversationId时才添加该字段
     const difyPayload: ChatMessage = {
       inputs,
       query,
       response_mode: 'blocking',
-      conversation_id: conversationId || '',
       user: 'workplace_user'
     };
+
+    // 只在有conversationId时才添加该字段（Dify首次调用不传此字段）
+    if (conversationId) {
+      difyPayload.conversation_id = conversationId;
+    }
 
     const requestUrl = '/api/dify';
     const fetchBody = {
