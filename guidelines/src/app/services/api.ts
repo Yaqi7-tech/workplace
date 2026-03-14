@@ -193,7 +193,8 @@ export class WorkplaceApiService {
 
     // Dify把情绪数据放在answer文本中，需要解析出来
     // 尝试从answer中提取JSON格式的情绪数据
-    const emotionDataMatch = response.answer.match(/\{[^{}]*"session_emotion_timeline"[^{}]*"stress_curve"[^{}]*"emotion_curve"[^{}]*\}/);
+    // 使用更宽松的正则表达式来匹配包含嵌套大括号的JSON
+    const emotionDataMatch = response.answer.match(/\{\s*"session_emotion_timeline"[\s\S]*?"stress_curve"[\s\S]*?"emotion_curve"[\s\S]*?\n?\}/);
     if (emotionDataMatch) {
       try {
         let jsonString = emotionDataMatch[0];
@@ -423,8 +424,16 @@ ${structuredDataText}`;
       return `${role}: ${msg.content}`;
     }).join('\n');
 
-    // 构建结构化数据字符串
-    const structuredDataText = JSON.stringify(structuredData, null, 2);
+    // 构建结构化数据字符串 - 只有在有数据时才包含
+    let structuredDataSection = '';
+    if (structuredData && (
+      structuredData.session_emotion_timeline?.length > 0 ||
+      structuredData.stress_curve?.length > 0 ||
+      structuredData.emotion_curve?.length > 0
+    )) {
+      const structuredDataText = JSON.stringify(structuredData, null, 2);
+      structuredDataSection = `\n【结构化数据】\n${structuredDataText}`;
+    }
 
     const query = `【对话场景】
 ${scenario}
@@ -437,9 +446,7 @@ ${historyText}
 
 【用户本轮回复】
 ${userReply}
-
-【结构化数据】
-${structuredDataText}
+${structuredDataSection}
 
 请对职场新人的本轮回复进行评价和反馈，严格按照以下格式输出：
 【风险判定】...
