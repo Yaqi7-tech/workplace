@@ -193,13 +193,15 @@ export class WorkplaceApiService {
 
     // Dify把情绪数据放在answer文本中，需要解析出来
     // 尝试从answer中提取JSON格式的情绪数据
-    const emotionDataMatch = response.answer.match(/\{[\s\S]*?"session_emotion_timeline"[\s\S]*?"stress_curve"[\s\S]*?"emotion_curve"[\s\S]*?\n?\}/);
+    const emotionDataMatch = response.answer.match(/\{[^{}]*"session_emotion_timeline"[^{}]*"stress_curve"[^{}]*"emotion_curve"[^{}]*\}/);
     if (emotionDataMatch) {
       try {
-        // 清理JSON字符串（移除可能的Unicode转义）
         let jsonString = emotionDataMatch[0];
+        console.log('提取到的JSON字符串:', jsonString);
+
         // 替换Unicode转义序列
         jsonString = jsonString.replace(/\\u([0-9a-fA-F]{4})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
+
         const parsedEmotionData = JSON.parse(jsonString);
 
         if (parsedEmotionData.session_emotion_timeline) {
@@ -216,6 +218,8 @@ export class WorkplaceApiService {
       } catch (e) {
         console.warn('解析answer中的情绪数据失败:', e);
       }
+    } else {
+      console.warn('未能从answer中匹配到情绪数据JSON');
     }
 
     // 同时检查响应中的独立字段（如果有）
@@ -257,29 +261,30 @@ export class WorkplaceApiService {
     // 清理NPC返回的消息，移除JSON数据和场景描述
     let cleanAnswer = response.answer;
 
-    // 移除各种格式的JSON数据块
-    // 1. 移除完整的JSON对象（包括session_emotion_timeline等）
-    cleanAnswer = cleanAnswer.replace(/\{[\s\S]*?"session_emotion_timeline[\s\S]*?\}/g, '');
-    // 2. 移除不完整的JSON片段（如 ], "stress_curve"...）
-    cleanAnswer = cleanAnswer.replace(/\],\s*"[a-z_]+":\s*\[[\s\S]*?\}/g, '');
-    // 3. 移除单独的JSON数组
-    cleanAnswer = cleanAnswer.replace(/\[[\s\S]*?"turn":[\s\S]*?\}/g, '');
-    // 4. 移除残留的JSON标记
-    cleanAnswer = cleanAnswer.replace(/\],\s*\}/g, '');
-    cleanAnswer = cleanAnswer.replace(/\{\s*/g, '');
-
     // 移除场景描述和人设描述（以特定关键词开头的内容）
     const removePatterns = [
-      /特征：[\s\S]*?(?=$)|特征：[\s\S]*?(?=背景情境：)/,
-      /背景情境：[\s\S]*?(?=$)|背景情境：[\s\S]*?(?=具体事件：)/,
-      /具体事件：[\s\S]*?(?=$)|具体事件：[\s\S]*?(?=口头禅：)/,
-      /口头禅：[\s\S]*?(?=$)|口头禅：[\s\S]*?(?=行为红线：)/,
-      /行为红线：[\s\S]*?(?=$)|行为红线：[\s\S]*?(?=\n\n)/
+      /特征：[\s\S]*?(?=背景情境：|具体事件：|$)/g,
+      /背景情境：[\s\S]*?(?=具体事件：|口头禅：|特征：|$)/g,
+      /具体事件：[\s\S]*?(?=口头禅：|行为红线：|特征：|$)/g,
+      /口头禅：[\s\S]*?(?=行为红线：|特征：|背景情境：|$)/g,
+      /行为红线：[\s\S]*?(?=特征：|背景情境：|具体事件：|$)/g
     ];
 
     removePatterns.forEach(pattern => {
       cleanAnswer = cleanAnswer.replace(pattern, '');
     });
+
+    // 移除JSON数据块（包括各种格式）
+    // 1. 移除完整的JSON对象（包括session_emotion_timeline等）
+    cleanAnswer = cleanAnswer.replace(/\{[\s\S]*?(session_emotion_timeline|stress_curve|emotion_curve)[\s\S]*?\n?\}/g, '');
+    // 2. 移除不完整的JSON片段和残留符号
+    cleanAnswer = cleanAnswer.replace(/\],\s*"[a-z_]+":\s*\[[\s\S]*?\}/g, '');
+    cleanAnswer = cleanAnswer.replace(/\[[\s\S]*?"turn":\s*\d+[\s\S]*?\}/g, '');
+    cleanAnswer = cleanAnswer.replace(/\],\s*\}/g, '');
+    cleanAnswer = cleanAnswer.replace(/\{\s*/g, '');
+    cleanAnswer = cleanAnswer.replace(/\}\s*/g, '');
+    cleanAnswer = cleanAnswer.replace(/\]\s*/g, '');
+    cleanAnswer = cleanAnswer.replace(/"\s*/g, '');
 
     // 清理多余的空行
     cleanAnswer = cleanAnswer.replace(/\n{3,}/g, '\n\n').trim();
@@ -486,9 +491,10 @@ ${structuredDataText}
 function cleanSupervisorText(text: string): string {
   return text
     .trim()
-    .replace(/\n+$/g, '')           // 移除末尾的换行
-    .replace(/["'}\]]+$/g, '')      // 移除末尾的引号、大括号、中括号
-    .replace(/^[{"'\[]+/, '')       // 移除开头的引号、大括号、中括号
+    .replace(/\n+$/g, '')                    // 移除末尾的换行
+    .replace(/["'}\]]+\s*\}\s*["']*\s*$/g, '')  // 移除末尾的引号、大括号、中括号（包括可能的JSON标记）
+    .replace(/^[{"'\[]+\s*/g, '')            // 移除开头的引号、大括号、中括号
+    .replace(/\s*```[\s\S]*?```/g, '')       // 移除代码块标记
     .trim();
 }
 
