@@ -178,7 +178,7 @@ export function WorkplaceReport({
                     >
                       <div className="flex items-center gap-2 mb-2">
                         <span className="text-xs font-medium opacity-70">
-                          {message.role === 'user' ? '👤 你' : `${persona.icon} 带教老师`}
+                          {message.role === 'user' ? '👤 你' : `${persona.icon} ${persona.name}`}
                         </span>
                         <span className="text-xs opacity-50">
                           {message.timestamp.toLocaleTimeString('zh-CN', {

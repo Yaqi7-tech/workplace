@@ -413,7 +413,7 @@ export function WorkplaceChatInterface({
       scenarioType,
       personaType,
       scenarioTitle: scenario.title,
-      personaTitle: persona.title,
+      personaTitle: `${persona.title} - ${persona.name}`,
       turnCount: messages.length,
       startedAt: messages[0]?.timestamp,
       finishedAt: new Date()
@@ -435,7 +435,7 @@ export function WorkplaceChatInterface({
               返回
             </Button>
             <h2 className="text-lg font-semibold text-[rgb(45,45,45)]">
-              {scenario.title} × {persona.title}
+              {scenario.title} × {persona.title} - {persona.name}
             </h2>
             <div className="w-20" />
           </div>
@@ -450,7 +450,7 @@ export function WorkplaceChatInterface({
                 </div>
                 <div>
                   <h1 className="text-2xl font-bold text-[rgb(45,45,45)] mb-1">{scenario.title}</h1>
-                  <p className="text-[rgb(122,122,122)]">与 {persona.title} 的带教老师对话</p>
+                  <p className="text-[rgb(122,122,122)]">与 {persona.title} - {persona.name} 的带教老师对话</p>
                 </div>
               </div>
             </div>
@@ -534,7 +534,7 @@ export function WorkplaceChatInterface({
         <div className="p-4 border-b-2" style={{ borderColor: 'rgba(60,155,201,0.1)' }}>
           <div className="flex items-center gap-2 mb-3">
             <span className="text-xl">{persona.icon}</span>
-            <h4 className="font-semibold text-sm text-[rgb(45,45,45)]">{persona.title}</h4>
+            <h4 className="font-semibold text-sm text-[rgb(45,45,45)]">{persona.title} - {persona.name}</h4>
           </div>
           <div className="rounded-lg p-3 border" style={{ backgroundColor: 'rgb(254,254,250)', borderColor: 'rgba(60,155,201,0.2)' }}>
             <div className="flex items-center gap-1 mb-2">

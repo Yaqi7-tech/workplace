@@ -225,7 +225,7 @@ export function WorkplaceScenarioSelection({
                         style={{ backgroundColor: persona.color }}
                       >
                         <span className="text-2xl">{persona.icon}</span>
-                        <span className="font-medium text-lg">{persona.title}</span>
+                        <span className="font-medium text-lg">{persona.title} - {persona.name}</span>
                       </div>
                     </div>
 
