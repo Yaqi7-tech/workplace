@@ -362,43 +362,53 @@ ${structuredDataText}`;
 
     console.log('解析督导反馈原文:', text);
 
-    // 提取【风险判定】
+    // 首先尝试从新的JSON格式解析
+    try {
+      const parsed = JSON.parse(text);
+      if (parsed.arg1) {
+        // arg1包含markdown代码块，需要提取其中的JSON
+        let arg1Content = parsed.arg1;
+
+        // 移除markdown代码块标记 (```json ... ```)
+        arg1Content = arg1Content.replace(/^```json\s*\n?/i, '');
+        arg1Content = arg1Content.replace(/\n?```$/g, '');
+        arg1Content = arg1Content.trim();
+
+        console.log('提取arg1内容:', arg1Content);
+
+        // 解析内层JSON
+        const innerParsed = JSON.parse(arg1Content);
+        if (innerParsed.risk_test && typeof innerParsed.risk_test === 'string') {
+          const riskTest = innerParsed.risk_test;
+          const r1 = riskTest.match(/【风险判定】([\s\S]*?)(?=【雷区定位】|$)/);
+          const r2 = riskTest.match(/【雷区定位】([\s\S]*?)(?=【安全替换】|$)/);
+          const r3 = riskTest.match(/【安全替换】([\s\S]*?)$/);
+          if (r1) feedback.risk_assessment = cleanSupervisorText(r1[1]);
+          if (r2) feedback.risk_zone = cleanSupervisorText(r2[1]);
+          if (r3) feedback.safe_alternative = cleanSupervisorText(r3[1]);
+
+          console.log('从新JSON格式解析成功:', feedback);
+          return feedback;
+        }
+      }
+    } catch (e) {
+      console.log('JSON解析失败，尝试直接匹配:', e);
+    }
+
+    // 降级：直接从文本中匹配
     const riskMatch = text.match(/【风险判定】\s*([\s\S]*?)(?=【雷区定位】|$)/);
     if (riskMatch) {
       feedback.risk_assessment = cleanSupervisorText(riskMatch[1]);
     }
 
-    // 提取【雷区定位】
     const zoneMatch = text.match(/【雷区定位】\s*([\s\S]*?)(?=【安全替换】|$)/);
     if (zoneMatch) {
       feedback.risk_zone = cleanSupervisorText(zoneMatch[1]);
     }
 
-    // 提取【安全替换】
     const altMatch = text.match(/【安全替换】\s*([\s\S]*?)$/);
     if (altMatch) {
       feedback.safe_alternative = cleanSupervisorText(altMatch[1]);
-    }
-
-    // 如果没有匹配到，尝试从JSON中解析
-    if (!feedback.risk_assessment && !feedback.risk_zone && !feedback.safe_alternative) {
-      const jsonMatch = text.match(/\{[\s\S]*?\}/);
-      if (jsonMatch) {
-        try {
-          const parsed = JSON.parse(jsonMatch[0]);
-          if (parsed.risk_test && typeof parsed.risk_test === 'string') {
-            const riskTest = parsed.risk_test;
-            const r1 = riskTest.match(/【风险判定】([\s\S]*?)(?=【雷区定位】|$)/);
-            const r2 = riskTest.match(/【雷区定位】([\s\S]*?)(?=【安全替换】|$)/);
-            const r3 = riskTest.match(/【安全替换】([\s\S]*?)$/);
-            if (r1) feedback.risk_assessment = cleanSupervisorText(r1[1]);
-            if (r2) feedback.risk_zone = cleanSupervisorText(r2[1]);
-            if (r3) feedback.safe_alternative = cleanSupervisorText(r3[1]);
-          }
-        } catch {
-          // JSON解析失败
-        }
-      }
     }
 
     console.log('解析后的督导反馈:', feedback);
