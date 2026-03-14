@@ -109,6 +109,7 @@ export class WorkplaceApiService {
     };
 
     console.log('API调用参数:', { apiUrl, inputs, query: query.substring(0, 100) });
+    console.log('完整payload:', JSON.stringify(difyPayload, null, 2));
 
     for (let attempt = 0; attempt <= retries; attempt++) {
       try {
