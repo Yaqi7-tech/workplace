@@ -128,16 +128,25 @@ export function WorkplaceChatInterface({
       } else {
         // 向后兼容：如果是纯文本 hint，尝试解析 JSON
         try {
-          const parsed = JSON.parse(response.hint);
+          // 去除可能存在的代码块标记 (```json ... ```)
+          let textToParse = response.hint.trim();
+          // 移除开头的 ```json 或 ```
+          textToParse = textToParse.replace(/^```(?:json)?\s*\n?/i, '');
+          // 移除结尾的 ```
+          textToParse = textToParse.replace(/\n?```$/m, '');
+          // 去除首尾空白
+          textToParse = textToParse.trim();
+
+          const parsed = JSON.parse(textToParse);
           if (parsed.diagnosis && parsed.theory_base && parsed.guidance && parsed.example_reply) {
             setHintData(parsed);
           } else {
             // 不是有效的结构化数据，作为普通文本处理
             console.warn('Hint 返回的不是有效的结构化数据，使用默认提示');
           }
-        } catch {
+        } catch (e) {
           // 不是 JSON 格式，作为普通文本处理
-          console.warn('Hint 返回的不是 JSON 格式');
+          console.warn('Hint 返回的不是 JSON 格式:', e);
         }
       }
     } catch (error) {
