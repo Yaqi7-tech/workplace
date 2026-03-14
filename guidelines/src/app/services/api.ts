@@ -185,6 +185,9 @@ export class WorkplaceApiService {
       this.conversationId = response.conversation_id;
     }
 
+    // 调试：打印Dify返回的完整响应
+    console.log('Dify完整响应:', JSON.stringify(response, null, 2));
+
     // 提取情绪数据（如果存在）
     const emotionData: StructuredData = {};
 
