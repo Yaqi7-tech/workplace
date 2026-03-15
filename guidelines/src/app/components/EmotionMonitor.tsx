@@ -62,6 +62,11 @@ export function EmotionMonitor({ emotionTimeline, stressCurve, emotionCurve }: E
   const sortedEmotions = EXTENDED_EMOTION_ORDER.filter(emotion => currentEmotionDistribution[emotion] > 0);
   const totalEmotions = Object.values(currentEmotionDistribution).reduce((a, b) => a + b, 0) || 1;
 
+  // 调试日志
+  console.log('EmotionMonitor - emotionTimeline:', emotionTimeline);
+  console.log('EmotionMonitor - currentEmotionDistribution:', currentEmotionDistribution);
+  console.log('EmotionMonitor - sortedEmotions:', sortedEmotions);
+
   return (
     <div className="flex flex-col gap-4">
       {/* 情绪标签进度条 */}
@@ -74,13 +79,17 @@ export function EmotionMonitor({ emotionTimeline, stressCurve, emotionCurve }: E
           {sortedEmotions.map((emotion) => {
             const percentage = (currentEmotionDistribution[emotion] / totalEmotions) * 100;
             const colors = EMOTION_COLORS[emotion] || { start: '#999', end: '#ccc' };
+            const backgroundStyle = `linear-gradient(90deg, ${colors.start}, ${colors.end})`;
+
+            console.log(`Emotion: ${emotion}, Percentage: ${percentage}%, Background: ${backgroundStyle}`);
+
             return (
               <div
                 key={emotion}
                 className="h-full transition-all duration-500 ease-in-out group relative"
                 style={{
                   width: `${percentage}%`,
-                  background: `linear-gradient(90deg, ${colors.start}, ${colors.end})`,
+                  background: backgroundStyle,
                   minWidth: percentage > 0 ? '2px' : '0'
                 }}
                 title={`${emotion}: ${currentEmotionDistribution[emotion]}次 (${percentage.toFixed(1)}%)`}
