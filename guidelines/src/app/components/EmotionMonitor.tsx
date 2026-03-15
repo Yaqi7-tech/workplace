@@ -2,6 +2,7 @@
 
 import { LineChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid, AreaChart, Area } from 'recharts';
 import { Brain, Activity } from 'lucide-react';
+import { THEME_COLORS } from '@/app/config/workplaceScenarios';
 
 interface EmotionDataPoint {
   turn: number;
@@ -19,18 +20,19 @@ interface EmotionMonitorProps {
   emotionCurve: EmotionDataPoint[];
 }
 
-// 情绪颜色映射
-const EMOTION_COLORS: Record<string, string> = {
-  '平静': '#4CAF50',
-  '困惑': '#FF9800',
-  '愤怒': '#F44336',
-  '焦虑': '#FF5722',
-  '轻视': '#9C27B0',
-  '满意': '#2196F3',
-  '失望': '#795548',
-  '期待': '#00BCD4',
-  '紧张': '#E91E63',
-  '放松': '#8BC34A',
+// 情绪颜色映射（使用主题色渐变）
+const EMOTION_COLORS: Record<string, { start: string; end: string }> = {
+  '平静': { start: THEME_COLORS.greenLight, end: THEME_COLORS.cyan },
+  '困惑': { start: THEME_COLORS.yellow, end: THEME_COLORS.lightOrange },
+  '愤怒': { start: THEME_COLORS.red, end: THEME_COLORS.orange },
+  '焦虑': { start: THEME_COLORS.orange, end: THEME_COLORS.lightOrange },
+  '轻视': { start: THEME_COLORS.lightOrange, end: THEME_COLORS.yellow },
+  '满意': { start: THEME_COLORS.cyan, end: THEME_COLORS.blue },
+  '失望': { start: THEME_COLORS.yellowLight, end: THEME_COLORS.yellow },
+  '期待': { start: THEME_COLORS.greenLight, end: THEME_COLORS.cyan },
+  '紧张': { start: THEME_COLORS.orange, end: THEME_COLORS.red },
+  '放松': { start: THEME_COLORS.greenLight, end: THEME_COLORS.cyan },
+  '麻木': { start: 'rgb(150, 150, 150)', end: 'rgb(200, 200, 200)' }, // 灰色渐变
 };
 
 const EMOTION_ORDER = ['愤怒', '焦虑', '紧张', '轻视', '困惑', '失望', '平静', '放松', '满意', '期待'];
@@ -54,11 +56,39 @@ export function EmotionMonitor({ emotionTimeline, stressCurve, emotionCurve }: E
     return acc;
   }, {} as Record<string, number>);
 
-  const sortedEmotions = EMOTION_ORDER.filter(emotion => currentEmotionDistribution[emotion] > 0);
+  // 扩展情绪顺序，包含"麻木"
+  const EXTENDED_EMOTION_ORDER = [...EMOTION_ORDER, '麻木'];
+
+  const sortedEmotions = EXTENDED_EMOTION_ORDER.filter(emotion => currentEmotionDistribution[emotion] > 0);
   const totalEmotions = Object.values(currentEmotionDistribution).reduce((a, b) => a + b, 0) || 1;
+
+  // 为每种情绪生成唯一的渐变ID
+  const getGradientId = (emotion: string, index: number) => `emotion-gradient-${emotion}-${index}`;
 
   return (
     <div className="flex flex-col gap-4">
+      {/* SVG渐变定义 */}
+      <svg style={{ position: 'absolute', width: 0, height: 0 }}>
+        <defs>
+          {sortedEmotions.map((emotion, index) => {
+            const colors = EMOTION_COLORS[emotion] || { start: '#999', end: '#ccc' };
+            return (
+              <linearGradient
+                key={getGradientId(emotion, index)}
+                id={getGradientId(emotion, index)}
+                x1="0%"
+                y1="0%"
+                x2="100%"
+                y2="0%"
+              >
+                <stop offset="0%" stopColor={colors.start} stopOpacity={1} />
+                <stop offset="100%" stopColor={colors.end} stopOpacity={1} />
+              </linearGradient>
+            );
+          })}
+        </defs>
+      </svg>
+
       {/* 情绪标签进度条 */}
       <div>
         <div className="flex items-center gap-1.5 mb-2">
@@ -68,14 +98,14 @@ export function EmotionMonitor({ emotionTimeline, stressCurve, emotionCurve }: E
         <div className="h-3 rounded-full overflow-hidden flex" style={{ backgroundColor: 'rgba(60,155,201,0.1)' }}>
           {sortedEmotions.map((emotion, index) => {
             const percentage = (currentEmotionDistribution[emotion] / totalEmotions) * 100;
-            const color = EMOTION_COLORS[emotion] || '#999';
+            const gradientUrl = `url(#${getGradientId(emotion, index)})`;
             return (
               <div
                 key={emotion}
                 className="h-full transition-all duration-500 ease-in-out group relative"
                 style={{
                   width: `${percentage}%`,
-                  backgroundColor: color,
+                  background: gradientUrl,
                   minWidth: percentage > 0 ? '2px' : '0'
                 }}
                 title={`${emotion}: ${currentEmotionDistribution[emotion]}次 (${percentage.toFixed(1)}%)`}
@@ -94,7 +124,9 @@ export function EmotionMonitor({ emotionTimeline, stressCurve, emotionCurve }: E
             <div key={emotion} className="flex items-center gap-1">
               <div
                 className="w-2 h-2 rounded-full"
-                style={{ backgroundColor: EMOTION_COLORS[emotion] }}
+                style={{
+                  background: `linear-gradient(135deg, ${EMOTION_COLORS[emotion]?.start || '#999'}, ${EMOTION_COLORS[emotion]?.end || '#ccc'})`
+                }}
               />
               <span className="text-xs text-[rgb(122,122,122)]">{emotion}</span>
             </div>
