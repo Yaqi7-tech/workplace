@@ -62,33 +62,8 @@ export function EmotionMonitor({ emotionTimeline, stressCurve, emotionCurve }: E
   const sortedEmotions = EXTENDED_EMOTION_ORDER.filter(emotion => currentEmotionDistribution[emotion] > 0);
   const totalEmotions = Object.values(currentEmotionDistribution).reduce((a, b) => a + b, 0) || 1;
 
-  // 为每种情绪生成唯一的渐变ID
-  const getGradientId = (emotion: string, index: number) => `emotion-gradient-${emotion}-${index}`;
-
   return (
     <div className="flex flex-col gap-4">
-      {/* SVG渐变定义 */}
-      <svg style={{ position: 'absolute', width: 0, height: 0 }}>
-        <defs>
-          {sortedEmotions.map((emotion, index) => {
-            const colors = EMOTION_COLORS[emotion] || { start: '#999', end: '#ccc' };
-            return (
-              <linearGradient
-                key={getGradientId(emotion, index)}
-                id={getGradientId(emotion, index)}
-                x1="0%"
-                y1="0%"
-                x2="100%"
-                y2="0%"
-              >
-                <stop offset="0%" stopColor={colors.start} stopOpacity={1} />
-                <stop offset="100%" stopColor={colors.end} stopOpacity={1} />
-              </linearGradient>
-            );
-          })}
-        </defs>
-      </svg>
-
       {/* 情绪标签进度条 */}
       <div>
         <div className="flex items-center gap-1.5 mb-2">
@@ -96,16 +71,16 @@ export function EmotionMonitor({ emotionTimeline, stressCurve, emotionCurve }: E
           <h4 className="text-xs font-semibold text-[rgb(45,45,45)]">情绪分布</h4>
         </div>
         <div className="h-3 rounded-full overflow-hidden flex" style={{ backgroundColor: 'rgba(60,155,201,0.1)' }}>
-          {sortedEmotions.map((emotion, index) => {
+          {sortedEmotions.map((emotion) => {
             const percentage = (currentEmotionDistribution[emotion] / totalEmotions) * 100;
-            const gradientUrl = `url(#${getGradientId(emotion, index)})`;
+            const colors = EMOTION_COLORS[emotion] || { start: '#999', end: '#ccc' };
             return (
               <div
                 key={emotion}
                 className="h-full transition-all duration-500 ease-in-out group relative"
                 style={{
                   width: `${percentage}%`,
-                  background: gradientUrl,
+                  background: `linear-gradient(90deg, ${colors.start}, ${colors.end})`,
                   minWidth: percentage > 0 ? '2px' : '0'
                 }}
                 title={`${emotion}: ${currentEmotionDistribution[emotion]}次 (${percentage.toFixed(1)}%)`}
