@@ -66,6 +66,7 @@ export function EmotionMonitor({ emotionTimeline, stressCurve, emotionCurve }: E
   console.log('EmotionMonitor - emotionTimeline:', emotionTimeline);
   console.log('EmotionMonitor - currentEmotionDistribution:', currentEmotionDistribution);
   console.log('EmotionMonitor - sortedEmotions:', sortedEmotions);
+  console.log('EmotionMonitor - EMOTION_COLORS:', EMOTION_COLORS);
 
   return (
     <div className="flex flex-col gap-4">
@@ -81,7 +82,7 @@ export function EmotionMonitor({ emotionTimeline, stressCurve, emotionCurve }: E
             const colors = EMOTION_COLORS[emotion] || { start: '#999', end: '#ccc' };
             const backgroundStyle = `linear-gradient(90deg, ${colors.start}, ${colors.end})`;
 
-            console.log(`Emotion: ${emotion}, Percentage: ${percentage}%, Background: ${backgroundStyle}`);
+            console.log(`Emotion: ${emotion}, Percentage: ${percentage}%, Colors:`, colors, `Background: ${backgroundStyle}`);
 
             return (
               <div
@@ -90,6 +91,7 @@ export function EmotionMonitor({ emotionTimeline, stressCurve, emotionCurve }: E
                 style={{
                   width: `${percentage}%`,
                   background: backgroundStyle,
+                  backgroundColor: colors.start, // 备用纯色
                   minWidth: percentage > 0 ? '2px' : '0'
                 }}
                 title={`${emotion}: ${currentEmotionDistribution[emotion]}次 (${percentage.toFixed(1)}%)`}

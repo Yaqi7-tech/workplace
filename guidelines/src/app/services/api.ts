@@ -206,10 +206,13 @@ export class WorkplaceApiService {
         // 替换Unicode转义序列
         jsonString = jsonString.replace(/\\u([0-9a-fA-F]{4})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
 
+        console.log('Unicode替换后的JSON字符串:', jsonString);
+
         const parsedEmotionData = JSON.parse(jsonString);
 
         if (parsedEmotionData.session_emotion_timeline) {
           emotionData.session_emotion_timeline = parsedEmotionData.session_emotion_timeline;
+          console.log('解析的情绪时间线:', parsedEmotionData.session_emotion_timeline);
         }
         if (parsedEmotionData.stress_curve) {
           emotionData.stress_curve = parsedEmotionData.stress_curve;
