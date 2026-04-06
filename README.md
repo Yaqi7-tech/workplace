@@ -77,25 +77,28 @@
 
 <div align="center">
 
+### 欢迎界面
+![欢迎界面](./docs/screenshots/01-welcome.png)
+
 ### 场景选择
 选择想要练习的职场场景
-![场景选择](./docs/screenshots/01-scenario-selection.png)
+![场景选择](./docs/screenshots/02-scenario-selection.png)
 
 ### 人设选择
 选择不同类型的"老板"人设进行练习
-![人设选择](./docs/screenshots/02-persona-selection.png)
+![人设选择](./docs/screenshots/03-persona-selection.png)
 
-### AI 对话界面
-沉浸式对话练习，AI 模拟真实职场场景
-![对话界面](./docs/screenshots/03-chat-interface.png)
+### 确认选择
+确认场景和人设，准备开始训练
+![确认选择](./docs/screenshots/04-confirm-selection.png)
 
-### 情绪实时监测
-可视化 NPC 情绪状态，帮助判断沟通效果
-![情绪监测](./docs/screenshots/04-emotion-monitor.png)
+### 对话界面 - 初始状态
+NPC 发出开场白，准备开始对话
+![对话初始状态](./docs/screenshots/05-chat-initial.png)
 
-### 训练报告
-多维度评价个人表现，生成成长报告
-![训练报告](./docs/screenshots/05-training-report.png)
+### 对话界面 - 交互演示
+实时对话练习，AI 模拟真实职场场景
+![对话交互演示](./docs/screenshots/06-chat-demo.png)
 
 </div>
 
