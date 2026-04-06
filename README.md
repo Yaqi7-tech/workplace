@@ -77,11 +77,25 @@
 
 <div align="center">
 
-### AI 对话界面与情绪监测
-![对话界面与情绪监测](./docs/screenshots/ui-design.png)
+### 场景选择
+选择想要练习的职场场景
+![场景选择](./docs/screenshots/01-scenario-selection.png)
 
-### 情绪监测系统
-![情绪监测系统](./docs/screenshots/emotion-monitor.png)
+### 人设选择
+选择不同类型的"老板"人设进行练习
+![人设选择](./docs/screenshots/02-persona-selection.png)
+
+### AI 对话界面
+沉浸式对话练习，AI 模拟真实职场场景
+![对话界面](./docs/screenshots/03-chat-interface.png)
+
+### 情绪实时监测
+可视化 NPC 情绪状态，帮助判断沟通效果
+![情绪监测](./docs/screenshots/04-emotion-monitor.png)
+
+### 训练报告
+多维度评价个人表现，生成成长报告
+![训练报告](./docs/screenshots/05-training-report.png)
 
 </div>
 
