@@ -3,6 +3,7 @@ import { LoginPage } from '@/app/components/LoginPage';
 import { WorkplaceScenarioSelection } from '@/app/components/WorkplaceScenarioSelection';
 import { WorkplaceChatInterface } from '@/app/components/WorkplaceChatInterface';
 import { WorkplaceReport } from '@/app/components/WorkplaceReport';
+import { ApiSettingsPage } from '@/app/components/ApiSettingsPage';
 import type { ScenarioType, PersonaType } from '@/app/config/workplaceScenarios';
 
 interface Message {
@@ -11,7 +12,7 @@ interface Message {
   timestamp: Date;
 }
 
-type AppState = 'login' | 'scenario-selection' | 'chat' | 'report';
+type AppState = 'login' | 'api-settings' | 'scenario-selection' | 'chat' | 'report';
 
 export default function WorkplaceApp() {
   const [appState, setAppState] = useState<AppState>('login');
@@ -75,8 +76,16 @@ export default function WorkplaceApp() {
       {appState === 'login' && (
         <LoginPage
           onLogin={handleLogin}
+          onOpenSettings={() => setAppState('api-settings')}
           title="职场 NPC 模拟培训系统"
           subtitle="提升职场沟通技能，真实模拟各种职场场景"
+        />
+      )}
+
+      {appState === 'api-settings' && (
+        <ApiSettingsPage
+          onBack={() => setAppState('login')}
+          onConfigured={() => setAppState('scenario-selection')}
         />
       )}
 

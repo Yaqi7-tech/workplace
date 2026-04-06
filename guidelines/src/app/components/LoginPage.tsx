@@ -3,15 +3,16 @@ import { Button } from '@/app/components/ui/button';
 import { Input } from '@/app/components/ui/input';
 import { Label } from '@/app/components/ui/label';
 import { supabase } from '@/lib/supabase';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Settings } from 'lucide-react';
 
 interface LoginPageProps {
   onLogin: (userId?: string) => void;
+  onOpenSettings?: () => void;
   title?: string;
   subtitle?: string;
 }
 
-export function LoginPage({ onLogin, title = '职场培训系统', subtitle }: LoginPageProps) {
+export function LoginPage({ onLogin, onOpenSettings, title = '职场培训系统', subtitle }: LoginPageProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -75,8 +76,20 @@ export function LoginPage({ onLogin, title = '职场培训系统', subtitle }: L
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgb(254,254,250), rgb(254,253,249))' }}>
+    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(135deg, rgb(254,254,250), rgb(254,253,249))' }}>
       <div className="w-full max-w-md">
+        {onOpenSettings && (
+          <div className="flex justify-end mb-4">
+            <button
+              onClick={onOpenSettings}
+              className="p-2 rounded-lg hover:bg-white/50 transition-colors"
+              style={{ color: 'rgb(122,122,122)' }}
+              title="配置 API"
+            >
+              <Settings className="w-5 h-5" />
+            </button>
+          </div>
+        )}
         <div className="bg-white rounded-2xl shadow-lg p-8 border-2" style={{ borderColor: 'rgba(60,155,201,0.15)' }}>
           <div className="text-center mb-8">
             <h1 className="text-3xl font-semibold text-[rgb(45,45,45)] mb-2">

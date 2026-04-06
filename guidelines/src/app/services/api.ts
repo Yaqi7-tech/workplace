@@ -57,20 +57,89 @@ export interface SupervisorFeedback {
   safe_alternative: string;
 }
 
+// 从 localStorage 获取 API key
+const getStorageKey = (envKey: string, storageKey: string): string => {
+  // 优先使用环境变量（开发模式）
+  const envValue = import.meta.env[envKey];
+  if (envValue && envValue !== '' && !envValue.includes('your-')) {
+    return envValue;
+  }
+  // 其次使用 localStorage 中的配置
+  if (typeof window !== 'undefined') {
+    return localStorage.getItem(storageKey) || '';
+  }
+  return '';
+};
+
 const getApiConfig = () => {
   const npcUrl = import.meta.env.VITE_NPC_API_URL || 'https://api.dify.ai/v1';
-  const npcKey = import.meta.env.VITE_NPC_API_KEY || 'app-R4FHtuNaBdtN9LzCgECSMUqS';
-  const hintUrl = import.meta.env.VITE_HINT_API_URL || 'https://api.dify.ai/v1';
-  const hintKey = import.meta.env.VITE_HINT_API_KEY || 'app-8XBYq3cFNVIHX4HqJNXqp28A';
-  const supervisorUrl = import.meta.env.VITE_SUPERVISOR_API_URL || 'https://api.dify.ai/v1';
-  const supervisorKey = import.meta.env.VITE_SUPERVISOR_API_KEY || 'app-yQp1aS5YSKGlUEmlMpqY7rwG';
+  const npcKey = getStorageKey('VITE_NPC_API_KEY', 'dify_npc_api_key');
 
-  console.log('API配置:', { npcUrl, npcKey, hintUrl, hintKey, supervisorUrl, supervisorKey });
+  const hintUrl = import.meta.env.VITE_HINT_API_URL || 'https://api.dify.ai/v1';
+  const hintKey = getStorageKey('VITE_HINT_API_KEY', 'dify_hint_api_key');
+
+  const supervisorUrl = import.meta.env.VITE_SUPERVISOR_API_URL || 'https://api.dify.ai/v1';
+  const supervisorKey = getStorageKey('VITE_SUPERVISOR_API_KEY', 'dify_supervisor_api_key');
+
+  console.log('API配置:', {
+    npcUrl,
+    npcKey: npcKey ? `${npcKey.slice(0, 8)}...` : '未配置',
+    hintUrl,
+    hintKey: hintKey ? `${hintKey.slice(0, 8)}...` : '未配置',
+    supervisorUrl,
+    supervisorKey: supervisorKey ? `${supervisorKey.slice(0, 8)}...` : '未配置'
+  });
 
   return {
     npc: { url: npcUrl, key: npcKey },
     hint: { url: hintUrl, key: hintKey },
     supervisor: { url: supervisorUrl, key: supervisorKey }
+  };
+};
+
+// 检查 API 配置是否完整
+export const checkApiConfig = (): { configured: boolean; missing: string[] } => {
+  const config = getApiConfig();
+  const missing: string[] = [];
+
+  if (!config.npc.key) missing.push('NPC API Key');
+  if (!config.hint.key) missing.push('Hint API Key');
+  if (!config.supervisor.key) missing.push('Supervisor API Key');
+
+  return {
+    configured: missing.length === 0,
+    missing
+  };
+};
+
+// 保存 API 配置到 localStorage
+export const saveApiConfig = (keys: {
+  npcKey?: string;
+  hintKey?: string;
+  supervisorKey?: string;
+}) => {
+  if (typeof window !== 'undefined') {
+    if (keys.npcKey !== undefined) {
+      localStorage.setItem('dify_npc_api_key', keys.npcKey);
+    }
+    if (keys.hintKey !== undefined) {
+      localStorage.setItem('dify_hint_api_key', keys.hintKey);
+    }
+    if (keys.supervisorKey !== undefined) {
+      localStorage.setItem('dify_supervisor_api_key', keys.supervisorKey);
+    }
+  }
+};
+
+// 获取存储的 API 配置（用于设置页面回显）
+export const getStoredApiConfig = () => {
+  if (typeof window === 'undefined') {
+    return { npcKey: '', hintKey: '', supervisorKey: '' };
+  }
+  return {
+    npcKey: localStorage.getItem('dify_npc_api_key') || '',
+    hintKey: localStorage.getItem('dify_hint_api_key') || '',
+    supervisorKey: localStorage.getItem('dify_supervisor_api_key') || ''
   };
 };
 

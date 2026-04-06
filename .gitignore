@@ -10,3 +10,17 @@ build
 *.swp
 *.swo
 *~.claude/
+
+# 数据文件
+*.xlsx
+*.xls
+*.csv
+
+# Office 临时文件
+~$*
+*.tmp
+.*.swp
+
+# 内部文档
+副本*.doc*
+副本*.xls*
